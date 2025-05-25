@@ -159,7 +159,7 @@ const getLast7DaysSummary = asyncHandler(async (req, res) => {
   const summary = await Expense.aggregate([
     {
       $match: {
-        user: new mongoose.Types.ObjectId(req.user._id),
+        user: mongoose.Types.ObjectId(req.user._id),
         date: { $gte: startDate, $lte: endDate },
       },
     },

@@ -1,3 +1,7 @@
+import mongoose, { Schema } from "mongoose";
+
+
+
 const sipSchema = new Schema(
   {
     sipName: {
@@ -17,11 +21,11 @@ const sipSchema = new Schema(
     durationInMonths: {
       type: Number,
       default: 12,
-      min:1,
+      min: 1,
     },
     frequency: {
       type: String,
-      enum: ["monthly", "quarterly","yearly"],
+      enum: ["monthly", "quarterly", "yearly"],
       default: "monthly",
     },
     goal: {
@@ -46,9 +50,11 @@ const sipSchema = new Schema(
     },
     user: {
       type: Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "User",
       required: true,
     },
   },
   { timestamps: true }
 );
+
+export const SIP = mongoose.model("SIP", sipSchema);
