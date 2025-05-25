@@ -28,7 +28,9 @@ const registerUser = asyncHandler(async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const fullname = req.body.fullname;
-
+if (!req.body) {
+  throw new ApiError(400, "Request body is missing");
+}
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")
   ) {

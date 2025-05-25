@@ -55,6 +55,6 @@ export const deletePayment = asyncHandler(async (req, res) => {
     _id: req.params.id,
     user: req.user._id,
   });
-  if (!payment) throw new ApiError(404, "Payment not found");
+  if (!payment) throw new ApiError(404, "Payment not found"); 
   res.status(200).json(new ApiResponse(200, {}, "Payment deleted"));
 });

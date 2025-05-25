@@ -34,7 +34,7 @@ const getExpenseSummary = asyncHandler(async (req, res) => {
   const summary = await Expense.aggregate([
     {
       $match: {
-        user: new mongoose.Types.ObjectId(req.user._id),
+        user: new mongoose.Types.ObjectId(req.user._id), // <-- fixed here
         date: { $gte: start, $lte: end },
       },
     },

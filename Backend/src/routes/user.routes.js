@@ -10,12 +10,12 @@ import {
   changePassword,
   displayCurrentUser,
 } from "../controllers/users.controllers.js";
-import { verifyJWT } from "../middleware/auth.middleware.js";
+import { checksession, verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.route("/register").post(registerUser);
-router.route("/login").post(login);
+router.route("/register").post(checksession,registerUser);
+router.route("/login").post(checksession,login);
 router.route("/logout").post(verifyJWT, logout);
 router.route("/refresh-token").post(refreshAccessToken);
 
