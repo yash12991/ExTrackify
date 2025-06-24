@@ -28,9 +28,9 @@ const registerUser = asyncHandler(async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const fullname = req.body.fullname;
-if (!req.body) {
-  throw new ApiError(400, "Request body is missing");
-}
+  if (!req.body) {
+    throw new ApiError(400, "Request body is missing");
+  }
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")
   ) {
@@ -73,7 +73,9 @@ if (!req.body) {
 const login = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
   if (!(username || email)) {
-    throw new ApiError(400, "user name or email is required");
+    // throw new ApiError(400, "user name or email is required");
+    res.status(404).json({ message: "Username or email is required" });
+    return;
   }
 
   const user = await User.findOne({
@@ -81,12 +83,16 @@ const login = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
-    throw new ApiError(401, "user not exist");
+    // throw new ApiError(401, "user not exist");
+    return res
+      .status(404)
+      .json({ message: "user with given username or password not exist" });
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
   if (!isPasswordValid) {
-    throw new ApiError(401, "incorrect password");
+    // throw new ApiError(401, "incorrect password");
+    return res.status(404).json({ message: "incorrect password" });
   }
   const { accessToken, refreshToken } =
     await generateAccessTokenandRefreshToken(user._id);
@@ -206,10 +212,14 @@ const deleteUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User deleted successfully"));
 });
 
-
-const displayCurrentUser = asyncHandler(async(req,res)=>{
-  return res.status(200).json(new ApiResponse(201,req.user,"Current user fetch succesfully"));
-})
+const displayCurrentUser = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(201, req.user, "Current user fetch succesfully"));
+});
 
 export {
   registerUser,
@@ -221,4 +231,3 @@ export {
   changePassword,
   displayCurrentUser,
 };
-                                             

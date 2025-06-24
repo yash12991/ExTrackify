@@ -1,0 +1,72 @@
+:root {
+  --cursor-color: #058bcd;
+  --cursor-hover: rgba(182, 81, 9, 0.2);
+}
+
+* {
+  cursor: none !important;
+}
+
+.app-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--cursor-color);
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--cursor-color);
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: all 0.15s ease-out;
+}
+
+.cursor-blur {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, var(--cursor-hover) 0%, transparent 70%);
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9997;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+}
+
+/* Interactive elements styles */
+a:hover,
+button:hover,
+.feature-card:hover,
+.stat-card:hover,
+.nav-link:hover {
+  cursor: none;
+}
+
+@media (max-width: 768px) {
+  .cursor-dot,
+  .cursor-ring,
+  .cursor-blur {
+    display: none;
+  }
+  
+  * {
+    cursor: auto !important;
+  }
+}
+  * {
+    cursor: auto !important;
+  }

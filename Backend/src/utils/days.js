@@ -2,20 +2,28 @@ export const getDateRange = (period) => {
   const now = new Date();
   let start;
 
-  if (period === "daily") {
-    start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  } else if (period === "weekly") {
-    const day = now.getDay(); // 0 (Sun) - 6 (Sat)
-    start = new Date(now);
-    start.setDate(now.getDate() - day);
-    start.setHours(0, 0, 0, 0);
-  } else if (period === "monthly") {
-    start = new Date(now.getFullYear(), now.getMonth(), 1);
-  } else {
-    throw new Error("Invalid period");
+  switch (period) {
+    case "daily":
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      break;
+    case "weekly":
+      const day = now.getDay();
+      start = new Date(now);
+      start.setDate(now.getDate() - day);
+      start.setHours(0, 0, 0, 0);
+      break;
+    case "monthly":
+      start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+      break;
+    default:
+      throw new Error(`Invalid period: ${period}`);
   }
 
-  return { start, end: now };
+  // Set end to end of current day
+  const end = new Date(now);
+  end.setHours(23, 59, 59, 999);
+
+  return { start, end };
 };
 
 

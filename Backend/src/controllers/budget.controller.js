@@ -106,7 +106,7 @@ const getBudgetStatus = asyncHandler(async (req, res) => {
     const totalSpent = await Expense.aggregate([
       {
         $match: {
-          user: mongoose.Types.ObjectId(req.user._id),
+          user: new mongoose.Types.ObjectId(req.user._id),
           category: budget.category,
           date: {
             $gte: new Date(year, month, 1),

@@ -1,0 +1,175 @@
+{
+  "info": {
+    "name": "Expense Tracker API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "raw": {
+                "username": "testuser",
+                "email": "test@example.com",
+                "password": "password123",
+                "fullname": "Test User"
+              }
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "raw": {
+                "email": "test@example.com",
+                "password": "password123"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Create Expense",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/expenses",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            },
+            "body": {
+              "raw": {
+                "category": "Food",
+                "amount": 50.00,
+                "date": "2024-01-20",
+                "modeofpayment": "upi",
+                "notes": "Lunch",
+                "tags": ["meal", "restaurant"]
+              }
+            }
+          }
+        },
+        {
+          "name": "Get User Expenses",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/expenses?page=1&limit=10",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SIP",
+      "item": [
+        {
+          "name": "Create SIP",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/sips",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            },
+            "body": {
+              "raw": {
+                "sipName": "Monthly Investment",
+                "amount": 5000,
+                "durationInMonths": 12,
+                "frequency": "monthly",
+                "goal": "Retirement"
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All SIPs",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/sips",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Budget",
+      "item": [
+        {
+          "name": "Set Category Budget",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/budgets",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            },
+            "body": {
+              "raw": {
+                "category": "Food",
+                "amount": 10000
+              }
+            }
+          }
+        },
+        {
+          "name": "Set Overall Budget",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/budgets/overall",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            },
+            "body": {
+              "raw": {
+                "amount": 50000
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/payments",
+            "headers": {
+              "Authorization": "Bearer {{accessToken}}"
+            },
+            "body": {
+              "raw": {
+                "sipId": "{{sipId}}",
+                "amount": 5000,
+                "paymentDate": "2024-01-20"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ]
+}
