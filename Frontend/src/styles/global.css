@@ -1,0 +1,23 @@
+.app-wrapper {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #0f0f0f;
+}
+
+.app-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Remove default cursors */
+* {
+  cursor: none !important;
+}
+
+/* Mobile overrides */
+@media (max-width: 768px) {
+  * {
+    cursor: auto !important;
+  }
+}

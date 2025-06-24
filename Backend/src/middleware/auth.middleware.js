@@ -9,7 +9,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer", "").trim();
 
+
     if (!token) {
+      // return res.status(401).json({message:"Unauthorised request"});
       throw new ApiError(401, "Unauthorised request");
     }
 
@@ -27,5 +29,20 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     next(); // <-- This is required!
   } catch (error) {
     throw new ApiError(401, error?.message || "Invalid access token");
+  }
+});
+
+export const checksession = asyncHandler(async (req, res, next) => {
+  try {
+    const token =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer", "").trim();
+
+    if (token) {
+      throw new ApiError(401, "User already logged in");
+    }
+    next();
+  } catch (error) {
+    next(error); // Pass the actual error for proper handling
   }
 });

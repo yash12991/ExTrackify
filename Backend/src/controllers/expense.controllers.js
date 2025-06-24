@@ -28,72 +28,187 @@ import { addFrequency } from "../cronJobs/cronJobs.js"; // <-- Import the helper
 
 // GET /api/expenses/summary?period=daily|weekly|monthly
 const getExpenseSummary = asyncHandler(async (req, res) => {
-  const period = req.query.period || "monthly"; // default monthly
-  const { start, end } = getDateRange(period);
+  try {
+    const period = req.query.period || "monthly";
+    const { start, end } = getDateRange(period);
 
-  const summary = await Expense.aggregate([
-    {
-      $match: {
-        user: new mongoose.Types.ObjectId(req.user._id),
-        date: { $gte: start, $lte: end },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalAmount: { $sum: "$amount" },
-      },
-    },
-  ]);
+    // Convert dates to start and end of day
+    const startDate = new Date(start);
+    startDate.setHours(0, 0, 0, 0);
 
-  res.status(200).json({
-    success: true,
-    period,
-    total: summary[0]?.totalAmount || 0,
-  });
+    const endDate = new Date(end);
+    endDate.setHours(23, 59, 59, 999);
+
+    // Log dates for debugging
+    console.log("Query date range:", {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    });
+
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+
+    const summary = await Expense.aggregate([
+      {
+        $match: {
+          user: userId,
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 }, // Add count for debugging
+        },
+      },
+    ]);
+
+    console.log("Raw query result:", summary);
+
+    const response = {
+      success: true,
+      period,
+      total: summary.length > 0 ? summary[0].totalAmount : 0,
+      count: summary.length > 0 ? summary[0].count : 0,
+      dateRange: {
+        start: startDate,
+        end: endDate,
+      },
+    };
+
+    console.log("Response:", response);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Detailed error in getExpenseSummary:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    throw new ApiError(500, "Failed to get expense summary");
+  }
 });
 
 const SetExpense = asyncHandler(async (req, res) => {
-  const {
-    category,
-    amount,
-    date,
-    notes,
-    modeofpayment,
-    tags,
-    recurring,
-    frequency,
-  } = req.body;
+  try {
+    const {
+      category,
+      amount,
+      date,
+      notes,
+      modeofpayment,
+      tags,
+      recurring,
+      frequency,
+    } = req.body;
 
-  if (!category || !amount) {
-    throw new ApiError(400, "Category and amount are required");
+    // Validate required fields
+    if (!category || !amount || !modeofpayment) {
+      throw new ApiError(
+        400,
+        "Category, amount, and mode of payment are required"
+      );
+    }
+
+    // Validate amount
+    if (isNaN(amount) || amount <= 0) {
+      throw new ApiError(400, "Amount must be a positive number");
+    }
+
+    // Parse and validate date
+    const expenseDate = new Date(date || Date.now());
+    // const expenseDate = new Date(date || Date.now());
+    expenseDate.setHours(0, 0, 0, 0); // Set to start of day
+
+    if (isNaN(expenseDate.getTime())) {
+      throw new ApiError(400, "Invalid date format");
+    }
+
+    let nextOccurrence = null;
+    if (recurring && frequency) {
+      nextOccurrence = addFrequency(expenseDate, frequency);
+    }
+
+    // Create expense with validated data
+    const expense = await Expense.create({
+      category: category.trim(),
+      amount: Number(amount),
+      date: expenseDate,
+      notes: notes?.trim(),
+      modeofpayment,
+      tags: Array.isArray(tags) ? tags.map((tag) => tag.trim()) : [],
+      recurring: Boolean(recurring),
+      frequency,
+      user: new mongoose.Types.ObjectId(req.user._id),
+      nextOccurrence,
+    });
+
+    // Verify expense was created
+    if (!expense) {
+      throw new ApiError(500, "Failed to create expense");
+    }
+
+    res.status(201).json({
+      success: true,
+      data: expense,
+      message: "Expense created successfully",
+    });
+  } catch (error) {
+    console.error("Error in SetExpense:", error);
+    throw new ApiError(
+      error.statusCode || 500,
+      error.message || "Failed to create expense"
+    );
   }
-
-  let nextOccurrence;
-  if (recurring && frequency) {
-    const baseDate = date ? new Date(date) : new Date();
-    nextOccurrence = addFrequency(baseDate, frequency);
-  }
-
-  const expense = await Expense.create({
-    category,
-    amount,
-    date: date ? new Date(date) : undefined,
-    notes,
-    modeofpayment,
-    tags,
-    recurring,
-    frequency,
-    user: req.user._id,
-    nextOccurrence, // <-- set here if recurring
-  });
-  res.status(201).json({ success: true, data: expense });
 });
 
 const getUserExpenses = asyncHandler(async (req, res) => {
-  const expense = await Expense.find({ user: req.user._id }).sort({ date: -1 });
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "date",
+    sortOrder = "desc",
+    category,
+    startDate,
+    endDate,
+    minAmount,
+    maxAmount,
+  } = req.query;
 
-  res.status(200).json({ success: true, data: expense });
+  const query = { user: req.user._id };
+
+  // Apply filters
+  if (category) query.category = category;
+  if (startDate || endDate) {
+    query.date = {};
+    if (startDate) query.date.$gte = new Date(startDate);
+    if (endDate) query.date.$lte = new Date(endDate);
+  }
+  if (minAmount || maxAmount) {
+    query.amount = {};
+    if (minAmount) query.amount.$gte = Number(minAmount);
+    if (maxAmount) query.amount.$lte = Number(maxAmount);
+  }
+
+  const expenses = await Expense.find(query)
+    .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .exec();
+
+  const total = await Expense.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    data: expenses,
+    pagination: {
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
+    },
+  });
 });
 
 const updateExpense = asyncHandler(async (req, res) => {
@@ -159,7 +274,7 @@ const getLast7DaysSummary = asyncHandler(async (req, res) => {
   const summary = await Expense.aggregate([
     {
       $match: {
-        user: mongoose.Types.ObjectId(req.user._id),
+        user: new mongoose.Types.ObjectId(req.user._id), // Fixed: added 'new'
         date: { $gte: startDate, $lte: endDate },
       },
     },

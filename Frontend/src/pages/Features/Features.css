@@ -1,0 +1,230 @@
+.features-page {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  color: #fff;
+  overflow: hidden;
+}
+
+.features-hero {
+  text-align: center;
+  padding: clamp(2rem, 5vw, 4rem) 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.features-hero h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  margin-bottom: clamp(1rem, 2vw, 2rem);
+  background: linear-gradient(90deg, #ff6b00, #ff8533);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  opacity: 0.8;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: 1rem;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 107, 0, 0.2);
+  border-radius: 20px;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card.coming-soon {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.feature-icon {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.feature-card h3 {
+  font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+  margin-bottom: 1rem;
+}
+
+.feature-details {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.features-comparison {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.features-comparison h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  background: linear-gradient(90deg, #ff6b00, #ff8533);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(1rem, 2vw, 2rem);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.plan-card {
+  position: relative;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.coming-soon-tag {
+  font-size: clamp(0.8rem, 1vw, 0.9rem);
+}
+
+@media (max-width: 768px) {
+  .features-hero {
+    padding-top: 2rem;
+  }
+  
+  .feature-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .feature-card {
+    max-width: 100%;
+  }
+  
+  .plans-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .feature-details li {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-hero h1 {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .feature-card {
+    padding: 1.25rem;
+  }
+  
+  .plan-card {
+    padding: 1.25rem;
+  }
+  
+  .coming-soon-tag {
+    position: static;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+  
+  .features-page {
+    padding: 1rem;
+  }
+  
+  .feature-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .plan-card {
+    margin: 1rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .features-hero,
+  .plans-grid {
+    padding-left: max(2rem, calc((100% - 1400px) / 2));
+    padding-right: max(2rem, calc((100% - 1400px) / 2));
+  }
+}
+
+@supports (height: 100dvh) {
+  .features-page {
+    min-height: 100dvh;
+  }
+}
+
+
+.plan-button {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-button:hover:not(:disabled) {
+  background: var(--primary);
+  color: var(--darker);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+}
+
+.plan-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.plan-button:hover {
+  background: #ff6b00;
+  color: white;
+}
+
+.plan-button.premium {
+  background: #ff6b00;
+  color: white;
+}
+
+.plan-button.premium:hover {
+  background: #ff8533;
+  border-color: #ff8533;
+}
+
+@media (max-width: 768px) {
+  .features-hero {
+    padding: 3rem 1rem;
+  }
+  
+  .feature-cards {
+    padding: 1rem;
+  }
+  
+  .price {
+    font-size: 2.5rem;
+  }
+}
