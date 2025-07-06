@@ -8,6 +8,9 @@ import {
   getActiveSIPs,
   getSIPProjection,
   getSIPChartData,
+  getSIPAnalytics,
+  getSIPSummary,
+  getUpcomingPaymentsDashboard,
 } from "../controllers/SIP.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
@@ -25,8 +28,17 @@ router.get("/active", verifyJWT, getActiveSIPs);
 // Get SIP chart data (for graphs)
 router.get("/chart", verifyJWT, getSIPChartData);
 
+// Get SIP summary dashboard
+router.get("/summary", verifyJWT, getSIPSummary);
+
+// Get upcoming payments
+router.get("/upcoming-payments", verifyJWT, getUpcomingPaymentsDashboard);
+
 // Get a single SIP by ID
 router.get("/:id", verifyJWT, getSIPById);
+
+// Get SIP analytics
+router.get("/:id/analytics", verifyJWT, getSIPAnalytics);
 
 // Update a SIP
 router.put("/:id", verifyJWT, updateSIP);

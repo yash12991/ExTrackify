@@ -14,18 +14,16 @@ import { checksession, verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.route("/register").post(checksession, registerUser);
-router.route("/login").post(checksession, login);
-router.route("/logout").post(verifyJWT, logout);
-router.route("/refresh-token").post(refreshAccessToken);
+// Authentication routes
+router.post("/register", checksession, registerUser);
+router.post("/login", checksession, login);
+router.post("/logout", verifyJWT, logout);
+router.post("/refresh-token", refreshAccessToken);
 
 // Protected routes
-router.route("/profile").put(verifyJWT, updateProfile);
-router.route("/delete").delete(verifyJWT, deleteUser);
-router.route("/change-password").post(verifyJWT, changePassword);
-router.route("/get-currentUser").get(verifyJWT, displayCurrentUser);
-router.route("/me").get(verifyJWT, (req, res) => {
-  res.status(200).json({ success: true, user: req.user });
-});
+router.put("/profile", verifyJWT, updateProfile);
+router.delete("/delete", verifyJWT, deleteUser);
+router.post("/change-password", verifyJWT, changePassword);
+router.get("/me", verifyJWT, displayCurrentUser);
 
 export default router;

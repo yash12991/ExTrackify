@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/Users.models.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+
 const generateAccessTokenandRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -24,16 +25,12 @@ const generateAccessTokenandRefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const username = req.body.username;
-  const email = req.body.email;
-  const password = req.body.password;
-  const fullname = req.body.fullname;
+  const { name, email, password } = req.body;
+
   if (!req.body) {
     throw new ApiError(400, "Request body is missing");
   }
-  if (
-    [fullname, email, username, password].some((field) => field?.trim() === "")
-  ) {
+  if ([name, email, password].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -42,22 +39,24 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!emailRegex.test(email)) {
     throw new ApiError(401, "Invalid email");
   }
-  if (password.length < 8) {
-    throw new ApiError(401, "Password size should be greater than 8");
+  if (password.length < 6) {
+    throw new ApiError(401, "Password size should be greater than 6");
   }
 
   const existedUser = await User.findOne({
-    $or: [{ username: username.toLowerCase() }, { email }],
+    $or: [{ username: email }, { email }],
   });
   if (existedUser) {
-    throw new ApiError(400, "User with email or username already exist");
+    throw new ApiError(400, "User with email already exists");
   }
+
   const user = await User.create({
-    fullname,
-    username: username.toLowerCase(),
+    fullname: name,
+    username: email, // Using email as username for simplicity
     email,
     password,
   });
+
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -65,9 +64,31 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new ApiError(500, "something went wrong while creation");
   }
+
+  // Generate tokens for immediate login after registration
+  const { accessToken, refreshToken } =
+    await generateAccessTokenandRefreshToken(user._id);
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  };
+
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, "user created successfully"));
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: createdUser,
+          accessToken,
+          refreshToken,
+        },
+        "user created successfully"
+      )
+    );
 });
 
 const login = asyncHandler(async (req, res) => {

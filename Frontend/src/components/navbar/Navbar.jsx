@@ -52,6 +52,14 @@ const Navbar = () => {
         >
           Dashboard
         </NavLink>
+        {isAuthenticated && (
+          <NavLink
+            to="/bills"
+            className={({ isActive }) => (isActive ? "active-link" : "nav-link")}
+          >
+            Bills
+          </NavLink>
+        )}
         <NavLink
           to="/features"
           className={({ isActive }) => (isActive ? "active-link" : "nav-link")}

@@ -20,6 +20,9 @@ router.delete("/:id", verifyJWT, deleteExpense); // Delete expense
 router.get("/chart/category-summary", verifyJWT, getCategoryWiseSummary);
 router.get("/chart/weekly-summary", verifyJWT, getLast7DaysSummary);
 router.get("/chart/monthly-summary",verifyJWT, getLast6MonthsSummary);
+
+
+
 export default router; 
 
 
