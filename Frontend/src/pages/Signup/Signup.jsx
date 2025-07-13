@@ -1,104 +1,294 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { signup } from "../../lib/api";
+import { Link, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import { register, sendOtp, verifyOtp } from "../../lib/api";
+import Loader from "../../components/Loading/Loading";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    fullname: "",
-    username: "",
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [step, setStep] = useState(1); // 1: form, 2: OTP verification
+  const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value.trim(),
+    }));
+    if (error) setError("");
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
+
+    // Validate form first
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
     setError("");
-    setLoading(true);
+
     try {
-     
-      await signup(form);
-      navigate("/login");
-    } catch (err) {
-      setError(err?.response?.data?.message || "Signup failed");
+      const response = await sendOtp(formData.email);
+      console.log("OTP sent successfully:", response);
+      toast.success("OTP sent to your email!");
+      setStep(2);
+      setOtpSent(true);
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      const errorMessage = error.message || "Failed to send OTP";
+
+      // If user already exists, show option to login
+      if (errorMessage.includes("already exists")) {
+        toast.error("User already exists. Please login instead.");
+        // Optionally redirect to login page
+        // navigate("/login");
+      } else {
+        toast.error(errorMessage);
+      }
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col gap-6"
-      >
-        <h2 className="text-2xl font-bold text-center text-[#e25a5a]">
-          Sign Up
-        </h2>
-        {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-2 rounded">
-            {error}
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+
+    if (!otp) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // Verify OTP first
+      const verifyResponse = await verifyOtp(formData.email, otp);
+      console.log("OTP verified successfully:", verifyResponse);
+
+      // If OTP is valid, proceed with registration
+      const response = await register({
+        name: formData.name, // Changed from 'fullname' to 'name'
+        email: formData.email,
+        password: formData.password,
+      });
+
+      await queryClient.invalidateQueries("auth");
+      toast.success("Registration successful!");
+      navigate("/dashboard", { replace: true });
+    } catch (error) {
+      console.error("Verification/Registration error:", error);
+      const errorMessage = error.message || "Failed to verify OTP or register";
+      toast.error(errorMessage);
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      await sendOtp(formData.email);
+      toast.success("OTP resent successfully!");
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      const errorMessage = error.message || "Failed to resend OTP";
+      toast.error(errorMessage);
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (step === 1) {
+    return (
+      <div className="body">
+        {isLoading && <Loader />}
+        {/* Your existing signup form JSX */}
+        <div className="form-container">
+          <div className="left-container">
+            <h1>Sign Up</h1>
+            {error && <div className="error-message">{error}</div>}
+            <form onSubmit={handleSendOtp}>
+              <div className="form-group">
+                <label htmlFor="name">FullName</label>
+                <input
+                  id="name"
+                  type="text"
+                  name="name"
+                  placeholder="Enter your name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="Enter email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                  minLength={6}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                  minLength={6}
+                />
+              </div>
+
+              <button type="submit" className="btn" disabled={isLoading}>
+                {isLoading ? "Sending OTP..." : "Send OTP"}
+              </button>
+
+              <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="hover:underline hover:text-blue-500"
+                >
+                  Login here
+                </Link>
+              </div>
+            </form>
           </div>
-        )}
-        <input
-          type="text"
-          name="fullname"
-          placeholder="Full Name"
-          className="border rounded px-4 py-2"
-          value={form.fullname}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          className="border rounded px-4 py-2"
-          value={form.username}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="border rounded px-4 py-2"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="border rounded px-4 py-2"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-        <button
-          type="submit"
-          className="bg-[#e25a5a] text-white py-2 rounded font-bold hover:bg-[#b13b3b] transition"
-          disabled={loading}
-        >
-          {loading ? "Signing up..." : "Sign Up"}
-        </button>
-        <p className="text-center text-sm">
-          Already have an account?{" "}
-          <span
-            className="text-[#e25a5a] cursor-pointer underline"
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </span>
-        </p>
-      </form>
+          {/* Right container with welcome message */}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="body">
+      {isLoading && <Loader />}
+      <div className="form-container">
+        <div className="left-container">
+          <h1>Verify OTP</h1>
+          <p>We've sent a 6-digit OTP to {formData.email}</p>
+          {error && <div className="error-message">{error}</div>}
+          <form onSubmit={handleVerifyOtp}>
+            <div className="form-group">
+              <label htmlFor="otp">Enter OTP</label>
+              <input
+                id="otp"
+                type="text"
+                name="otp"
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                required
+                disabled={isLoading}
+                maxLength={6}
+                style={{
+                  textAlign: "center",
+                  letterSpacing: "2px",
+                  fontSize: "1.2rem",
+                }}
+              />
+            </div>
+
+            <button type="submit" className="btn" disabled={isLoading}>
+              {isLoading ? "Verifying..." : "Verify & Register"}
+            </button>
+
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <button
+                type="button"
+                onClick={resendOtp}
+                disabled={isLoading}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#667eea",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                Resend OTP
+              </button>
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#666",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+              >
+                ← Back to form
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

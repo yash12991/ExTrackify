@@ -165,50 +165,85 @@ const SetExpense = asyncHandler(async (req, res) => {
 });
 
 const getUserExpenses = asyncHandler(async (req, res) => {
-  const {
-    page = 1,
-    limit = 10,
-    sortBy = "date",
-    sortOrder = "desc",
-    category,
-    startDate,
-    endDate,
-    minAmount,
-    maxAmount,
-  } = req.query;
+  try {
+    // Input validation and sanitization
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const sortBy = ["date", "amount", "category", "time", "createdAt"].includes(
+      req.query.sortBy
+    )
+      ? req.query.sortBy
+      : "date";
+    const sortOrder = ["asc", "desc"].includes(req.query.sortOrder)
+      ? req.query.sortOrder
+      : "desc";
 
-  const query = { user: req.user._id };
+    // Build base query
+    const query = { user: req.user._id };
 
-  // Apply filters
-  if (category) query.category = category;
-  if (startDate || endDate) {
-    query.date = {};
-    if (startDate) query.date.$gte = new Date(startDate);
-    if (endDate) query.date.$lte = new Date(endDate);
+    // Category filter
+    if (req.query.category) {
+      query.category = req.query.category;
+    }
+
+    // Date range filter
+    if (req.query.startDate || req.query.endDate) {
+      query.date = {};
+      if (req.query.startDate) {
+        const startDate = new Date(req.query.startDate);
+        if (!isNaN(startDate)) {
+          query.date.$gte = startDate.setHours(0, 0, 0, 0);
+        }
+      }
+      if (req.query.endDate) {
+        const endDate = new Date(req.query.endDate);
+        if (!isNaN(endDate)) {
+          query.date.$lte = endDate.setHours(23, 59, 59, 999);
+        }
+      }
+    }
+
+    // Amount range filter
+    if (req.query.minAmount || req.query.maxAmount) {
+      query.amount = {};
+      if (req.query.minAmount) {
+        query.amount.$gte = Number(req.query.minAmount);
+      }
+      if (req.query.maxAmount) {
+        query.amount.$lte = Number(req.query.maxAmount);
+      }
+    }
+
+    // Determine sort field - use createdAt for time-based sorting
+    let sortField = sortBy;
+    if (sortBy === "time") {
+      sortField = "createdAt";
+    }
+
+    // Execute query with pagination
+    const [expenses, total] = await Promise.all([
+      Expense.find(query)
+        .sort({ [sortField]: sortOrder === "desc" ? -1 : 1 })
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .lean(),
+      Expense.countDocuments(query),
+    ]);
+
+    // Send response
+    return res.status(200).json({
+      success: true,
+      data: expenses,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+        limit,
+      },
+    });
+  } catch (error) {
+    throw new ApiError(500, `Error fetching expenses: ${error.message}`);
   }
-  if (minAmount || maxAmount) {
-    query.amount = {};
-    if (minAmount) query.amount.$gte = Number(minAmount);
-    if (maxAmount) query.amount.$lte = Number(maxAmount);
-  }
-
-  const expenses = await Expense.find(query)
-    .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
-    .limit(limit * 1)
-    .skip((page - 1) * limit)
-    .exec();
-
-  const total = await Expense.countDocuments(query);
-
-  res.status(200).json({
-    success: true,
-    data: expenses,
-    pagination: {
-      total,
-      page: Number(page),
-      pages: Math.ceil(total / limit),
-    },
-  });
 });
 
 const updateExpense = asyncHandler(async (req, res) => {

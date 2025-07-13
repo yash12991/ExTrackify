@@ -1,7 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 
-
-
 const sipSchema = new Schema(
   {
     sipName: {
@@ -43,6 +41,17 @@ const sipSchema = new Schema(
     },
     nextPaymentDate: {
       type: Date,
+    },
+    expectedRate: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 50,
+      default: 12,
+    },
+    expectedMaturityValue: {
+      type: Number,
+      default: 0,
     },
     notes: {
       type: String,

@@ -69,10 +69,65 @@ body, .homePage {
   margin-top: 24px;
   transition: background 0.2s;
   box-shadow: 0 2px 8px #0006;
+  position: relative;
+  overflow: hidden;
 }
 
 .home-link:hover {
   background: #b13b3b;
+}
+
+.homePage {
+  position: relative;
+  overflow: hidden;
+}
+
+.homePage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
+  animation: pulse 8s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+}
+
+.home-link::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
 }
 
 @media (max-width: 1000px) {

@@ -117,4 +117,26 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Local development
+.DS_Store
+*.local
+
+# Build directories
+/dist
+/build
+/out
+
+# Environment variables
+.env*
+!.env.example
+
+# Debug logs
+debug.log
+
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
