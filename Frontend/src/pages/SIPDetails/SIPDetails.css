@@ -8,7 +8,7 @@
 
 /* Header Styles */
 .sip-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(215, 170, 118, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 30px;
@@ -828,7 +828,7 @@
 
 .modal-header {
   padding: 25px 30px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(42, 23, 23, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -838,7 +838,7 @@
   font-size: 20px;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #430e0e, #ff8800);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

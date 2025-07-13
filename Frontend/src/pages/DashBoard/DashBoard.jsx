@@ -433,10 +433,7 @@ const DashBoard = () => {
           <button className="nav-item active">
             <FaWallet /> All Expenses
           </button>
-          <button 
-            className="nav-item"
-            onClick={() => navigate("/bills")}
-          >
+          <button className="nav-item" onClick={() => navigate("/bills")}>
             <FaFileInvoiceDollar /> Bills & Subscriptions
           </button>
           <button
@@ -455,7 +452,11 @@ const DashBoard = () => {
       <main className="dashboard-container">
         {/* Top Section */}
         <header className="dashboard-header">
-          <div>
+          <div style={
+            {display:"flex"}
+          }>
+            <img src="image.png" className="logo" onClick={()=>navigate("/")} style={{ height: "60px" }} 
+ alt="" />
             <h1>Hi {userName} – track your expense</h1>
           </div>
           <button className="logout-btn" onClick={handleLogout}>

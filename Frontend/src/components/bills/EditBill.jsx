@@ -68,7 +68,9 @@ const EditBill = ({ bill, onClose, onSuccess }) => {
       setFormData({
         billName: bill.billName || "",
         amount: bill.amount ? bill.amount.toString() : "",
-        dueDate: bill.dueDate ? new Date(bill.dueDate).toISOString().split('T')[0] : "",
+        dueDate: bill.dueDate
+          ? new Date(bill.dueDate).toISOString().split("T")[0]
+          : "",
         frequency: bill.frequency || "monthly",
         category: bill.category || "",
         status: bill.status || "pending",
@@ -102,7 +104,7 @@ const EditBill = ({ bill, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
@@ -129,7 +131,7 @@ const EditBill = ({ bill, onClose, onSuccess }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: null });
@@ -138,7 +140,7 @@ const EditBill = ({ bill, onClose, onSuccess }) => {
 
   const getMinDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toISOString().split("T")[0];
   };
 
   return (
@@ -331,11 +333,7 @@ const EditBill = ({ bill, onClose, onSuccess }) => {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={loading}
-            >
+            <button type="submit" className="submit-btn" disabled={loading}>
               {loading ? (
                 <div className="loading-spinner">
                   <div className="spinner"></div>

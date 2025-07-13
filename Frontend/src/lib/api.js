@@ -491,7 +491,9 @@ export const markBillAsPaid = async (billId) => {
     return response.data;
   } catch (error) {
     console.error("Error marking bill as paid:", error);
-    throw new Error(error.response?.data?.message || "Failed to mark bill as paid");
+    throw new Error(
+      error.response?.data?.message || "Failed to mark bill as paid"
+    );
   }
 };
 
@@ -501,7 +503,9 @@ export const getBillsSummary = async () => {
     return response.data.data;
   } catch (error) {
     console.error("Error fetching bills summary:", error);
-    throw new Error(error.response?.data?.message || "Failed to fetch bills summary");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch bills summary"
+    );
   }
 };
 
@@ -511,18 +515,22 @@ export const getBillsByCategory = async () => {
     return response.data.data;
   } catch (error) {
     console.error("Error fetching bills by category:", error);
-    throw new Error(error.response?.data?.message || "Failed to fetch bills by category");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch bills by category"
+    );
   }
 };
 
 export const getMonthlyBillsTotal = async (year, month) => {
   try {
     const response = await axiosInstance.get("/bills/monthly-total", {
-      params: { year, month }
+      params: { year, month },
     });
     return response.data.data;
   } catch (error) {
     console.error("Error fetching monthly bills total:", error);
-    throw new Error(error.response?.data?.message || "Failed to fetch monthly bills total");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch monthly bills total"
+    );
   }
 };

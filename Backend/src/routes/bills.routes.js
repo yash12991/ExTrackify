@@ -9,7 +9,7 @@ import {
   markBillAsPaid,
   getBillsSummary,
   getBillsByCategory,
-  getMonthlyBillsTotal
+  getMonthlyBillsTotal,
 } from "../controllers/bills.controller.js";
 
 const router = Router();

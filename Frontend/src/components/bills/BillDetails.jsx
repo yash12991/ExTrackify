@@ -82,12 +82,12 @@ const BillDetails = ({ bill, onClose, onEdit, onDelete, onMarkPaid }) => {
   const getFrequencyLabel = (frequency) => {
     const frequencyMap = {
       "one-time": "One Time",
-      "weekly": "Weekly",
-      "monthly": "Monthly",
+      weekly: "Weekly",
+      monthly: "Monthly",
       "3months": "Every 3 Months",
-      "quaterly": "Quarterly",
+      quaterly: "Quarterly",
       "6months": "Every 6 Months",
-      "yearly": "Yearly",
+      yearly: "Yearly",
     };
     return frequencyMap[frequency] || frequency;
   };
@@ -127,24 +127,30 @@ const BillDetails = ({ bill, onClose, onEdit, onDelete, onMarkPaid }) => {
             </div>
             <div className="bill-amount-section">
               <span className="amount-label">Amount</span>
-              <span className="amount-value">{formatCurrency(bill.amount)}</span>
+              <span className="amount-value">
+                {formatCurrency(bill.amount)}
+              </span>
             </div>
           </div>
 
           {/* Due Date Alert */}
-          {daysUntilDue >= 0 && daysUntilDue <= 7 && bill.status === "pending" && (
-            <div className="due-alert">
-              <FaExclamationTriangle className="alert-icon" />
-              <div className="alert-content">
-                <strong>
-                  {daysUntilDue === 0
-                    ? "Due Today!"
-                    : `Due in ${daysUntilDue} day${daysUntilDue > 1 ? 's' : ''}!`}
-                </strong>
-                <p>Don't forget to pay this bill on time.</p>
+          {daysUntilDue >= 0 &&
+            daysUntilDue <= 7 &&
+            bill.status === "pending" && (
+              <div className="due-alert">
+                <FaExclamationTriangle className="alert-icon" />
+                <div className="alert-content">
+                  <strong>
+                    {daysUntilDue === 0
+                      ? "Due Today!"
+                      : `Due in ${daysUntilDue} day${
+                          daysUntilDue > 1 ? "s" : ""
+                        }!`}
+                  </strong>
+                  <p>Don't forget to pay this bill on time.</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Bill Information */}
           <div className="bill-info-grid">
@@ -202,9 +208,7 @@ const BillDetails = ({ bill, onClose, onEdit, onDelete, onMarkPaid }) => {
                 <FaStickyNote className="notes-icon" />
                 Notes
               </div>
-              <div className="notes-content">
-                {bill.notes}
-              </div>
+              <div className="notes-content">{bill.notes}</div>
             </div>
           )}
 
@@ -217,12 +221,17 @@ const BillDetails = ({ bill, onClose, onEdit, onDelete, onMarkPaid }) => {
               </div>
               <div className="next-due-info">
                 <p>
-                  This bill repeats <strong>{getFrequencyLabel(bill.frequency).toLowerCase()}</strong>.
+                  This bill repeats{" "}
+                  <strong>
+                    {getFrequencyLabel(bill.frequency).toLowerCase()}
+                  </strong>
+                  .
                 </p>
                 {bill.status === "paid" && (
                   <p className="next-due-note">
                     <FaInfoCircle className="note-icon" />
-                    The next payment will be due based on the frequency settings.
+                    The next payment will be due based on the frequency
+                    settings.
                   </p>
                 )}
               </div>
@@ -232,28 +241,19 @@ const BillDetails = ({ bill, onClose, onEdit, onDelete, onMarkPaid }) => {
 
         {/* Action Buttons */}
         <div className="bill-actions">
-          <button
-            className="action-btn edit-btn"
-            onClick={onEdit}
-          >
+          <button className="action-btn edit-btn" onClick={onEdit}>
             <FaEdit />
             Edit Bill
           </button>
-          
+
           {bill.status === "pending" && (
-            <button
-              className="action-btn pay-btn"
-              onClick={onMarkPaid}
-            >
+            <button className="action-btn pay-btn" onClick={onMarkPaid}>
               <FaCheckCircle />
               Mark as Paid
             </button>
           )}
-          
-          <button
-            className="action-btn delete-btn"
-            onClick={onDelete}
-          >
+
+          <button className="action-btn delete-btn" onClick={onDelete}>
             <FaTrash />
             Delete Bill
           </button>

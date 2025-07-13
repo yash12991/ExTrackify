@@ -28,7 +28,11 @@ const App = () => {
 
   useEffect(() => {
     // Redirect from protected routes when not authenticated
-    if (!isLoading && !isAuthenticated && (location.pathname === "/dashboard" || location.pathname === "/bills")) {
+    if (
+      !isLoading &&
+      !isAuthenticated &&
+      (location.pathname === "/dashboard" || location.pathname === "/bills")
+    ) {
       navigate("/login");
     }
   }, [isAuthenticated, isLoading, location.pathname, navigate]);

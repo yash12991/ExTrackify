@@ -38,7 +38,7 @@ const Navbar = () => {
         <img src={logo} alt="Logo" className="logo-image" />
         <h1>ExTrackify</h1>
       </div>
-      
+
       <nav className="Options" role="navigation">
         <NavLink
           to="/"
@@ -55,7 +55,9 @@ const Navbar = () => {
         {isAuthenticated && (
           <NavLink
             to="/bills"
-            className={({ isActive }) => (isActive ? "active-link" : "nav-link")}
+            className={({ isActive }) =>
+              isActive ? "active-link" : "nav-link"
+            }
           >
             Bills
           </NavLink>
@@ -81,11 +83,11 @@ const Navbar = () => {
             onClick={handleLogout}
             disabled={isLoggingOut}
           >
-            {isLoggingOut ? 'Logging out...' : 'Logout'}
+            {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
         ) : (
-          <button 
-            className="login-btn" 
+          <button
+            className="login-btn"
             onClick={() => navigate("/login")}
             aria-label="Login or Sign up"
           >

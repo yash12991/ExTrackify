@@ -8,7 +8,6 @@ import {
   FaFileInvoice,
   FaStickyNote,
   // FaRepeat,
-  
   FaExclamationTriangle,
   FaIcons,
   FaTag,
@@ -18,7 +17,6 @@ import { TbRepeat } from "react-icons/tb";
 
 import { createBill } from "../../lib/api";
 import "./BillForm.css";
-
 
 const AddBill = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -85,7 +83,7 @@ const AddBill = ({ onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
@@ -112,7 +110,7 @@ const AddBill = ({ onClose, onSuccess }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: null });
@@ -121,7 +119,7 @@ const AddBill = ({ onClose, onSuccess }) => {
 
   const getMinDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toISOString().split("T")[0];
   };
 
   return (
@@ -292,11 +290,7 @@ const AddBill = ({ onClose, onSuccess }) => {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={loading}
-            >
+            <button type="submit" className="submit-btn" disabled={loading}>
               {loading ? (
                 <div className="loading-spinner">
                   <div className="spinner"></div>

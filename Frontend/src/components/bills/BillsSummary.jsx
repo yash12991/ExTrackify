@@ -71,7 +71,7 @@ const BillsSummary = () => {
         <div className="no-bills">
           <FaMoneyBillWave className="no-bills-icon" />
           <p>No bills found</p>
-          <button 
+          <button
             className="add-first-bill-btn"
             onClick={() => navigate("/bills")}
           >
@@ -98,10 +98,7 @@ const BillsSummary = () => {
           <FaMoneyBillWave className="header-icon" />
           Bills & Subscriptions
         </h3>
-        <button 
-          className="view-all-btn"
-          onClick={() => navigate("/bills")}
-        >
+        <button className="view-all-btn" onClick={() => navigate("/bills")}>
           View All
           <FaArrowRight />
         </button>
@@ -113,7 +110,9 @@ const BillsSummary = () => {
             <FaClock className="stat-icon" />
             <div className="stat-content">
               <span className="stat-label">Pending</span>
-              <span className="stat-amount">{formatCurrency(totalPending)}</span>
+              <span className="stat-amount">
+                {formatCurrency(totalPending)}
+              </span>
             </div>
           </div>
 
@@ -122,7 +121,9 @@ const BillsSummary = () => {
               <FaExclamationTriangle className="stat-icon" />
               <div className="stat-content">
                 <span className="stat-label">Overdue</span>
-                <span className="stat-amount">{formatCurrency(totalOverdue)}</span>
+                <span className="stat-amount">
+                  {formatCurrency(totalOverdue)}
+                </span>
               </div>
             </div>
           )}
@@ -153,10 +154,10 @@ const BillsSummary = () => {
                 </div>
               ))}
             </div>
-            
+
             {upcomingBills.length > 3 && (
               <div className="more-bills">
-                <button 
+                <button
                   className="view-more-btn"
                   onClick={() => navigate("/bills")}
                 >
@@ -172,7 +173,10 @@ const BillsSummary = () => {
             <FaExclamationTriangle className="alert-icon" />
             <div className="alert-content">
               <strong>Attention Required!</strong>
-              <p>You have {summary.overdueCount} overdue bill{summary.overdueCount > 1 ? 's' : ''}.</p>
+              <p>
+                You have {summary.overdueCount} overdue bill
+                {summary.overdueCount > 1 ? "s" : ""}.
+              </p>
             </div>
           </div>
         )}

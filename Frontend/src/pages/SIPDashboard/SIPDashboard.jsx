@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   FaPlus,
   FaEye,
   FaEdit,
   FaTrash,
-  FaChartLine,
   FaRupeeSign,
   FaCalendarAlt,
   FaBullseye,
   FaBell,
   FaPlay,
   FaPause,
-  FaArrowUp,
-  FaArrowRight,
   FaPiggyBank,
   FaClock,
+  FaArrowUp,
+  FaArrowDown,
+  FaCalculator,
+  FaBackward,
 } from "react-icons/fa";
-import { Line, Doughnut } from "react-chartjs-2";
+
+import { Line } from "react-chartjs-2";
 import toast from "react-hot-toast";
 import {
   getAllSIPs,
@@ -30,6 +32,7 @@ import {
   getUpcomingPayments,
 } from "../../lib/api";
 import "./SIPDashboard.css";
+import Sipcalc from "../../components/calculator/Sipcalc";
 
 const SIPDashboard = () => {
   const navigate = useNavigate();
@@ -42,7 +45,7 @@ const SIPDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSIP, setEditingSIP] = useState(null);
   const [filter, setFilter] = useState("all"); // all, active, inactive
-
+  const [displaycalc,setDisplayCalc] = useState("false");
   const [createFormData, setCreateFormData] = useState({
     sipName: "",
     amount: "",
@@ -91,73 +94,34 @@ const SIPDashboard = () => {
     }
   };
 
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px",
-      }
-    );
-
-    // Observe all SIP cards
-    const cards = document.querySelectorAll(".sip-card");
-    cards.forEach((card) => observer.observe(card));
-
-    return () => {
-      cards.forEach((card) => observer.unobserve(card));
-    };
-  }, [sips]); // Re-run when SIPs change
-
-  // Calculate expected maturity value for preview
   const calculateExpectedMaturity = () => {
     const amount = parseFloat(createFormData.amount) || 0;
     const rate = parseFloat(createFormData.expectedRate) || 0;
     const duration = parseInt(createFormData.durationInMonths) || 0;
-    const frequency = createFormData.frequency;
 
     if (!amount || !rate || !duration) return 0;
 
     const monthlyRate = rate / 12 / 100;
-    let maturityValue = 0;
+    const maturityValue =
+      amount *
+      (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
+        (1 + monthlyRate));
 
-    switch (frequency) {
-      case "monthly":
-        maturityValue =
-          amount *
-          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-            (1 + monthlyRate));
-        break;
-      case "quarterly":
-        const quarterlyRate = rate / 4 / 100;
-        const quarterlyDuration = Math.ceil(duration / 3);
-        maturityValue =
-          amount *
-          (((Math.pow(1 + quarterlyRate, quarterlyDuration) - 1) /
-            quarterlyRate) *
-            (1 + quarterlyRate));
-        break;
-      case "yearly":
-        const annualRate = rate / 100;
-        const yearlyDuration = Math.ceil(duration / 12);
-        maturityValue =
-          amount *
-          (((Math.pow(1 + annualRate, yearlyDuration) - 1) / annualRate) *
-            (1 + annualRate));
-        break;
-      default:
-        maturityValue =
-          amount *
-          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-            (1 + monthlyRate));
-    }
+    return maturityValue;
+  };
+
+  const calculateEditExpectedMaturity = () => {
+    const amount = parseFloat(editFormData.amount) || 0;
+    const rate = parseFloat(editFormData.expectedRate) || 0;
+    const duration = parseInt(editFormData.durationInMonths) || 0;
+
+    if (!amount || !rate || !duration) return 0;
+
+    const monthlyRate = rate / 12 / 100;
+    const maturityValue =
+      amount *
+      (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
+        (1 + monthlyRate));
 
     return maturityValue;
   };
@@ -221,51 +185,6 @@ const SIPDashboard = () => {
     }
   };
 
-  const calculateEditExpectedMaturity = () => {
-    const amount = parseFloat(editFormData.amount) || 0;
-    const rate = parseFloat(editFormData.expectedRate) || 0;
-    const duration = parseInt(editFormData.durationInMonths) || 0;
-    const frequency = editFormData.frequency;
-
-    if (!amount || !rate || !duration) return 0;
-
-    const monthlyRate = rate / 12 / 100;
-    let maturityValue = 0;
-
-    switch (frequency) {
-      case "monthly":
-        maturityValue =
-          amount *
-          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-            (1 + monthlyRate));
-        break;
-      case "quarterly":
-        const quarterlyRate = rate / 4 / 100;
-        const quarterlyDuration = Math.ceil(duration / 3);
-        maturityValue =
-          amount *
-          (((Math.pow(1 + quarterlyRate, quarterlyDuration) - 1) /
-            quarterlyRate) *
-            (1 + quarterlyRate));
-        break;
-      case "yearly":
-        const annualRate = rate / 100;
-        const yearlyDuration = Math.ceil(duration / 12);
-        maturityValue =
-          amount *
-          (((Math.pow(1 + annualRate, yearlyDuration) - 1) / annualRate) *
-            (1 + annualRate));
-        break;
-      default:
-        maturityValue =
-          amount *
-          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-            (1 + monthlyRate));
-    }
-
-    return maturityValue;
-  };
-
   const handleDeleteSIP = async (sipId, sipName) => {
     if (window.confirm(`Are you sure you want to delete "${sipName}"?`)) {
       try {
@@ -288,43 +207,41 @@ const SIPDashboard = () => {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <div className="loading-text">
-          Loading your SIP portfolio
-          <div className="loading-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
+        <p>Loading SIP Dashboard...</p>
       </div>
     );
   }
+
+
+
 
   return (
     <div className="sip-dashboard">
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-content">
-          <h1>SIP Portfolio</h1>
-          <p>Systematic Investment Plans Dashboard</p>
+          <img src="./image.png" alt="logo" style={{width:"60px"}}/>
+          <h1>SIP Dashboard</h1>
+          <p>Manage your Systematic Investment Plans</p>
         </div>
-        <button
-          className="create-sip-btn"
-          onClick={() => setShowCreateModal(true)}
-        >
-          <FaPlus /> Create New SIP
+
+      <div className="Nav-btn">
+        <button className="back-bt "  onClick={()=>navigate("/dashboard")}><FaBackward/></button>
+        <button className="calc-btn" onClick={()=>setDisplayCalc(displaycalc===true?false:true)} ><FaCalculator/>
+          Calculator
         </button>
+        <button className="create-btn" onClick={() => setShowCreateModal(true)}>
+          <FaPlus /> Create New
+        </button>
+        
+        </div>
       </div>
 
+              {displaycalc===true? <Sipcalc onClose ={()=>setDisplayCalc(false)}/>:" "}
       {/* Summary Cards */}
       {summary && (
-        <div className="summary-grid">
-          <motion.div
-            className="summary-card total"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+        <div className="summary-grid" style={{marginTop:"45px"}}>
+          <div className="summary-card">
             <div className="card-icon">
               <FaPiggyBank />
             </div>
@@ -333,14 +250,9 @@ const SIPDashboard = () => {
               <div className="card-value">{summary.totalSIPs}</div>
               <div className="card-subtitle">{summary.activeSIPs} active</div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="summary-card investment"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
+          <div className="summary-card">
             <div className="card-icon">
               <FaRupeeSign />
             </div>
@@ -353,14 +265,9 @@ const SIPDashboard = () => {
                 ₹{summary.totalPaid.toLocaleString()} paid
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="summary-card monthly"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
+          <div className="summary-card">
             <div className="card-icon">
               <FaCalendarAlt />
             </div>
@@ -371,262 +278,182 @@ const SIPDashboard = () => {
               </div>
               <div className="card-subtitle">per month</div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="summary-card upcoming"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
+          <div className="summary-card">
             <div className="card-icon">
               <FaBell />
             </div>
             <div className="card-content">
               <h3>Upcoming Payments</h3>
               <div className="card-value">
-                {summary.upcomingPayments.length}
+                {summary.upcomingPayments?.length || 0}
               </div>
               <div className="card-subtitle">in next 30 days</div>
             </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Charts Section */}
-      {chartData && (
-        <div className="charts-section">
-          <motion.div
-            className="chart-card"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <h3>Investment Growth Projection</h3>
-            <div className="chart-container">
-              <Line
-                data={chartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: "top",
-                    },
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                    },
-                  },
-                }}
-              />
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Upcoming Payments Alert */}
-      {upcomingPayments && upcomingPayments.length > 0 && (
-        <motion.div
-          className="upcoming-payments-alert"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <div className="alert-header">
-            <FaBell />
-            <h3>Upcoming Payments ({upcomingPayments.length})</h3>
           </div>
-          <div className="upcoming-payments-list">
-            {upcomingPayments.slice(0, 5).map((payment) => (
-              <div key={payment.sipId} className="upcoming-payment-item">
+        </div>
+      )}
+
+      {/* Upcoming Payments */}
+      {upcomingPayments && upcomingPayments.length > 0 && (
+        <div className="upcoming-payments">
+          <h3>
+            <FaBell /> Upcoming Payments ({upcomingPayments.length})
+          </h3>
+          <div className="payments-list">
+            {upcomingPayments.slice(0, 3).map((payment) => (
+              <div key={payment.sipId} className="payment-item">
                 <div className="payment-info">
-                  <div className="payment-name">{payment.sipName}</div>
-                  <div className="payment-details">
-                    <span className="payment-amount">
-                      ₹{payment.amount.toLocaleString()}
-                    </span>
-                    <span className="payment-frequency">
-                      ({payment.frequency})
-                    </span>
-                  </div>
-                  <div className="payment-maturity">
-                    Target: ₹{payment.expectedMaturityValue?.toLocaleString()}
-                    at {payment.expectedRate}% p.a.
-                  </div>
+                  <h4>{payment.sipName}</h4>
+                  <p>₹{payment.amount.toLocaleString()}</p>
                 </div>
                 <div className="payment-due">
-                  <div
+                  <span
                     className={`due-days ${
-                      payment.daysUntil <= 3
-                        ? "urgent"
-                        : payment.daysUntil <= 7
-                        ? "warning"
-                        : ""
+                      payment.daysUntil <= 3 ? "urgent" : ""
                     }`}
                   >
                     {payment.daysUntil === 0
                       ? "Due Today"
-                      : payment.daysUntil < 0
-                      ? `${Math.abs(payment.daysUntil)} days overdue`
                       : `${payment.daysUntil} days`}
-                  </div>
-                  <div className="due-date">
-                    {new Date(payment.dueDate).toLocaleDateString("en-IN")}
-                  </div>
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-          {upcomingPayments.length > 5 && (
-            <div className="view-all-payments">
-              <button onClick={() => navigate("/sip-dashboard")}>
-                View All {upcomingPayments.length} Upcoming Payments
-              </button>
-            </div>
-          )}
-        </motion.div>
+        </div>
       )}
 
-      {/* Filter and SIP List */}
-      <div className="sips-section">
-        <div className="section-header">
-          <h2>Your SIPs</h2>
-          <div className="filter-tabs">
-            <button
-              className={filter === "all" ? "active" : ""}
-              onClick={() => setFilter("all")}
-            >
-              All ({sips.length})
-            </button>
-            <button
-              className={filter === "active" ? "active" : ""}
-              onClick={() => setFilter("active")}
-            >
-              Active ({sips.filter((s) => s.isActive).length})
-            </button>
-            <button
-              className={filter === "inactive" ? "active" : ""}
-              onClick={() => setFilter("inactive")}
-            >
-              Inactive ({sips.filter((s) => !s.isActive).length})
-            </button>
-          </div>
+      {/* Filter Tabs */}
+      <div className="filter-section">
+        <h2>Your SIPs</h2>
+        <div className="filter-tabs">
+          <button
+            className={filter === "all" ? "active" : ""}
+            onClick={() => setFilter("all")}
+          >
+            All ({sips.length})
+          </button>
+          <button
+            className={filter === "active" ? "active" : ""}
+            onClick={() => setFilter("active")}
+          >
+            Active ({sips.filter((s) => s.isActive).length})
+          </button>
+          <button
+            className={filter === "inactive" ? "active" : ""}
+            onClick={() => setFilter("inactive")}
+          >
+            Inactive ({sips.filter((s) => !s.isActive).length})
+          </button>
         </div>
-
-        {filteredSIPs.length === 0 ? (
-          <div className="no-sips">
-            <FaPiggyBank />
-            <h3>No SIPs found</h3>
-            <p>Start your investment journey by creating your first SIP</p>
-            <button
-              className="create-first-sip-btn"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <FaPlus /> Create Your First SIP
-            </button>
-          </div>
-        ) : (
-          <div className="sips-grid">
-            {filteredSIPs.map((sip, index) => (
-              <motion.div
-                key={sip._id}
-                className="sip-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <div className="sip-header">
-                  <div className="sip-info">
-                    <h3>{sip.sipName}</h3>
-                    <p className="sip-goal">{sip.goal}</p>
-                  </div>
-                  <div className="sip-status">
-                    <span
-                      className={`status-badge ${
-                        sip.isActive ? "active" : "inactive"
-                      }`}
-                    >
-                      {sip.isActive ? <FaPlay /> : <FaPause />}
-                      {sip.isActive ? "Active" : "Paused"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="sip-details">
-                  <div className="detail-item">
-                    <FaRupeeSign />
-                    <span>₹{sip.amount.toLocaleString()}</span>
-                    <small>/{sip.frequency}</small>
-                  </div>
-                  <div className="detail-item">
-                    <FaCalendarAlt />
-                    <span>{sip.durationInMonths} months</span>
-                  </div>
-                  <div className="detail-item">
-                    <FaClock />
-                    <span>
-                      {new Date(sip.nextPaymentDate).toLocaleDateString(
-                        "en-IN"
-                      )}
-                    </span>
-                    <small>next payment</small>
-                  </div>
-                  {sip.expectedMaturityValue && (
-                    <div className="detail-item maturity">
-                      <FaBullseye />
-                      <span>₹{sip.expectedMaturityValue.toLocaleString()}</span>
-                      <small>expected @ {sip.expectedRate}%</small>
-                    </div>
-                  )}
-                </div>
-
-                <div className="sip-progress">
-                  <div className="progress-info">
-                    <span>Progress</span>
-                    <span>₹{sip.totalInvested.toLocaleString()}</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${Math.min(
-                          (sip.totalInvested /
-                            (sip.amount * sip.durationInMonths)) *
-                            100,
-                          100
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="sip-actions">
-                  <button
-                    className="action-btn view"
-                    onClick={() => navigate(`/sip/${sip._id}`)}
-                  >
-                    <FaEye /> View
-                  </button>
-                  <button
-                    className="action-btn edit"
-                    onClick={() => handleEditSIP(sip)}
-                  >
-                    <FaEdit /> Edit
-                  </button>
-                  <button
-                    className="action-btn delete"
-                    onClick={() => handleDeleteSIP(sip._id, sip.sipName)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* SIP Cards */}
+      {filteredSIPs.length === 0 ? (
+        <div className="no-sips">
+          <FaPiggyBank />
+          <h3>No SIPs found</h3>
+          <p>Start your investment journey by creating your first SIP</p>
+          <button
+            className="create-btn"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <FaPlus /> Create Your First SIP
+          </button>
+        </div>
+      ) : (
+        <div className="sips-grid">
+          {filteredSIPs.map((sip) => (
+            <div key={sip._id} className="sip-card">
+              <div className="sip-header">
+                <div className="sip-info">
+                  <h3>{sip.sipName}</h3>
+                  <p>{sip.goal}</p>
+                </div>
+                <span
+                  className={`status ${sip.isActive ? "active" : "inactive"}`}
+                >
+                  {sip.isActive ? <FaPlay /> : <FaPause />}
+                  {sip.isActive ? "Active" : "Paused"}
+                </span>
+              </div>
+
+              <div className="sip-details">
+                <div className="detail-row">
+                  <span className="label">Amount:</span>
+                  <span className="value">₹{sip.amount.toLocaleString()}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Duration:</span>
+                  <span className="value">{sip.durationInMonths} months</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Next Payment:</span>
+                  <span className="value">
+                    {new Date(sip.nextPaymentDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Expected Return:</span>
+                  <span className="value">
+                    ₹{sip.expectedMaturityValue?.toLocaleString() || "N/A"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="sip-progress">
+                <div className="progress-info">
+                  <span>Progress: ₹{sip.totalInvested.toLocaleString()}</span>
+                  <span>
+                    {Math.round(
+                      (sip.totalInvested /
+                        (sip.amount * sip.durationInMonths)) *
+                        100
+                    )}
+                    %
+                  </span>
+                </div>
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${Math.min(
+                        (sip.totalInvested /
+                          (sip.amount * sip.durationInMonths)) *
+                          100,
+                        100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="sip-actions">
+                <button
+                  className="action-btn view"
+                  onClick={() => navigate(`/sip/${sip._id}`)}
+                >
+                  <FaEye /> View
+                </button>
+                <button
+                  className="action-btn edit"
+                  onClick={() => handleEditSIP(sip)}
+                >
+                  <FaEdit /> Edit
+                </button>
+                <button
+                  className="action-btn delete"
+                  onClick={() => handleDeleteSIP(sip._id, sip.sipName)}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Create SIP Modal */}
       {showCreateModal && (
@@ -640,24 +467,25 @@ const SIPDashboard = () => {
               <button onClick={() => setShowCreateModal(false)}>×</button>
             </div>
             <form onSubmit={handleCreateSIP}>
+              <div className="form-group">
+                <label>SIP Name *</label>
+                <input
+                  type="text"
+                  value={createFormData.sipName}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      sipName: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., Retirement Fund"
+                  required
+                />
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
-                  <label>SIP Name *</label>
-                  <input
-                    type="text"
-                    value={createFormData.sipName}
-                    onChange={(e) =>
-                      setCreateFormData({
-                        ...createFormData,
-                        sipName: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., Retirement Fund"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Monthly Amount *</label>
+                  <label>Amount *</label>
                   <input
                     type="number"
                     value={createFormData.amount}
@@ -669,6 +497,24 @@ const SIPDashboard = () => {
                     }
                     placeholder="5000"
                     min="1000"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Expected Rate (%) *</label>
+                  <input
+                    type="number"
+                    value={createFormData.expectedRate}
+                    onChange={(e) =>
+                      setCreateFormData({
+                        ...createFormData,
+                        expectedRate: e.target.value,
+                      })
+                    }
+                    placeholder="12"
+                    min="0"
+                    max="50"
+                    step="0.1"
                     required
                   />
                 </div>
@@ -690,7 +536,7 @@ const SIPDashboard = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Duration (Months) *</label>
+                  <label>Duration</label>
                   <select
                     value={createFormData.durationInMonths}
                     onChange={(e) =>
@@ -705,7 +551,7 @@ const SIPDashboard = () => {
                     <option value={24}>2 Years</option>
                     <option value={36}>3 Years</option>
                     <option value={60}>5 Years</option>
-                    <option value={120}>10 Years</option>
+                    <option value={120}>20 Years</option>
                   </select>
                 </div>
               </div>
@@ -728,27 +574,6 @@ const SIPDashboard = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Expected Rate of Return (% p.a.) *</label>
-                  <input
-                    type="number"
-                    value={createFormData.expectedRate}
-                    onChange={(e) =>
-                      setCreateFormData({
-                        ...createFormData,
-                        expectedRate: e.target.value,
-                      })
-                    }
-                    placeholder="12"
-                    min="0"
-                    max="50"
-                    step="0.1"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
                   <label>Investment Goal</label>
                   <input
                     type="text"
@@ -759,24 +584,8 @@ const SIPDashboard = () => {
                         goal: e.target.value,
                       })
                     }
-                    placeholder="e.g., Retirement, House Down Payment"
+                    placeholder="e.g., Retirement"
                   />
-                </div>
-                <div className="form-group expected-maturity">
-                  <label>Expected Maturity Value</label>
-                  <div className="maturity-display">
-                    ₹
-                    {createFormData.amount &&
-                    createFormData.expectedRate &&
-                    createFormData.durationInMonths
-                      ? Math.round(calculateExpectedMaturity()).toLocaleString(
-                          "en-IN"
-                        )
-                      : "0"}
-                  </div>
-                  <small>
-                    Based on {createFormData.expectedRate}% annual return
-                  </small>
                 </div>
               </div>
 
@@ -793,6 +602,21 @@ const SIPDashboard = () => {
                   rows="3"
                   placeholder="Add any additional notes..."
                 />
+              </div>
+
+              <div className="expected-return">
+                <h4>Expected Maturity Value</h4>
+                <div className="return-amount">
+                  ₹
+                  {createFormData.amount &&
+                  createFormData.expectedRate &&
+                  createFormData.durationInMonths
+                    ? Math.round(calculateExpectedMaturity()).toLocaleString()
+                    : "0"}
+                </div>
+                <small>
+                  Based on {createFormData.expectedRate}% annual return
+                </small>
               </div>
 
               <div className="modal-actions">
@@ -815,24 +639,25 @@ const SIPDashboard = () => {
               <button onClick={() => setShowEditModal(false)}>×</button>
             </div>
             <form onSubmit={handleUpdateSIP}>
+              <div className="form-group">
+                <label>SIP Name *</label>
+                <input
+                  type="text"
+                  value={editFormData.sipName}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      sipName: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., Retirement Fund"
+                  required
+                />
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
-                  <label>SIP Name *</label>
-                  <input
-                    type="text"
-                    value={editFormData.sipName}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        sipName: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., Retirement Fund"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Monthly Amount *</label>
+                  <label>Amount *</label>
                   <input
                     type="number"
                     value={editFormData.amount}
@@ -844,6 +669,24 @@ const SIPDashboard = () => {
                     }
                     placeholder="5000"
                     min="1000"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Expected Rate (%) *</label>
+                  <input
+                    type="number"
+                    value={editFormData.expectedRate}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        expectedRate: e.target.value,
+                      })
+                    }
+                    placeholder="12"
+                    min="0"
+                    max="50"
+                    step="0.1"
                     required
                   />
                 </div>
@@ -865,7 +708,7 @@ const SIPDashboard = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Duration (Months) *</label>
+                  <label>Duration</label>
                   <select
                     value={editFormData.durationInMonths}
                     onChange={(e) =>
@@ -903,27 +746,6 @@ const SIPDashboard = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Expected Rate of Return (% p.a.) *</label>
-                  <input
-                    type="number"
-                    value={editFormData.expectedRate}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        expectedRate: e.target.value,
-                      })
-                    }
-                    placeholder="12"
-                    min="0"
-                    max="50"
-                    step="0.1"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
                   <label>Investment Goal</label>
                   <input
                     type="text"
@@ -934,24 +756,8 @@ const SIPDashboard = () => {
                         goal: e.target.value,
                       })
                     }
-                    placeholder="e.g., Retirement, House Down Payment"
+                    placeholder="e.g., Retirement"
                   />
-                </div>
-                <div className="form-group expected-maturity">
-                  <label>Expected Maturity Value</label>
-                  <div className="maturity-display">
-                    ₹
-                    {editFormData.amount &&
-                    editFormData.expectedRate &&
-                    editFormData.durationInMonths
-                      ? Math.round(
-                          calculateEditExpectedMaturity()
-                        ).toLocaleString("en-IN")
-                      : "0"}
-                  </div>
-                  <small>
-                    Based on {editFormData.expectedRate}% annual return
-                  </small>
                 </div>
               </div>
 
@@ -968,6 +774,23 @@ const SIPDashboard = () => {
                   rows="3"
                   placeholder="Add any additional notes..."
                 />
+              </div>
+
+              <div className="expected-return">
+                <h4>Expected Maturity Value</h4>
+                <div className="return-amount">
+                  ₹
+                  {editFormData.amount &&
+                  editFormData.expectedRate &&
+                  editFormData.durationInMonths
+                    ? Math.round(
+                        calculateEditExpectedMaturity()
+                      ).toLocaleString()
+                    : "0"}
+                </div>
+                <small>
+                  Based on {editFormData.expectedRate}% annual return
+                </small>
               </div>
 
               <div className="modal-actions">

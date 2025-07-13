@@ -18,7 +18,12 @@ import {
   FaClock,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import { getBills, deleteBill, markBillAsPaid, getBillsSummary } from "../../lib/api";
+import {
+  getBills,
+  deleteBill,
+  markBillAsPaid,
+  getBillsSummary,
+} from "../../lib/api";
 import AddBill from "../../components/bills/AddBill";
 import EditBill from "../../components/bills/EditBill";
 import BillDetails from "../../components/bills/BillDetails";
@@ -205,10 +210,7 @@ const BillsDashboard = () => {
             <FaMoneyBillWave className="title-icon" />
             Bills & Subscriptions
           </h1>
-          <button
-            className="add-bill-btn"
-            onClick={() => setShowAddBill(true)}
-          >
+          <button className="add-bill-btn" onClick={() => setShowAddBill(true)}>
             <FaPlus />
             Add Bill
           </button>
@@ -229,7 +231,9 @@ const BillsDashboard = () => {
             </div>
             <div className="card-content">
               <h3>Pending Bills</h3>
-              <p className="amount">{formatCurrency(summary.summary.pending.totalAmount)}</p>
+              <p className="amount">
+                {formatCurrency(summary.summary.pending.totalAmount)}
+              </p>
               <p className="count">{summary.summary.pending.count} bills</p>
             </div>
           </motion.div>
@@ -245,7 +249,9 @@ const BillsDashboard = () => {
             </div>
             <div className="card-content">
               <h3>Paid Bills</h3>
-              <p className="amount">{formatCurrency(summary.summary.paid.totalAmount)}</p>
+              <p className="amount">
+                {formatCurrency(summary.summary.paid.totalAmount)}
+              </p>
               <p className="count">{summary.summary.paid.count} bills</p>
             </div>
           </motion.div>
@@ -261,7 +267,9 @@ const BillsDashboard = () => {
             </div>
             <div className="card-content">
               <h3>Overdue Bills</h3>
-              <p className="amount">{formatCurrency(summary.summary.overdue.totalAmount)}</p>
+              <p className="amount">
+                {formatCurrency(summary.summary.overdue.totalAmount)}
+              </p>
               <p className="count">{summary.summary.overdue.count} bills</p>
             </div>
           </motion.div>
@@ -331,7 +339,9 @@ const BillsDashboard = () => {
               <label>Frequency:</label>
               <select
                 value={filters.frequency}
-                onChange={(e) => handleFilterChange("frequency", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange("frequency", e.target.value)
+                }
               >
                 <option value="all">All Frequencies</option>
                 <option value="one-time">One Time</option>
@@ -378,7 +388,7 @@ const BillsDashboard = () => {
         ) : filteredBills.length > 0 ? (
           filteredBills.map((bill) => {
             const daysUntilDue = getDaysUntilDue(bill.dueDate);
-            
+
             return (
               <motion.div
                 key={bill._id}
@@ -394,8 +404,11 @@ const BillsDashboard = () => {
                   </div>
                   <div className="bill-status">
                     {getStatusIcon(bill.status)}
-                    <span className={`status-text ${getStatusColor(bill.status)}`}>
-                      {bill.status.charAt(0).toUpperCase() + bill.status.slice(1)}
+                    <span
+                      className={`status-text ${getStatusColor(bill.status)}`}
+                    >
+                      {bill.status.charAt(0).toUpperCase() +
+                        bill.status.slice(1)}
                     </span>
                   </div>
                 </div>
@@ -403,7 +416,9 @@ const BillsDashboard = () => {
                 <div className="bill-details">
                   <div className="detail-item">
                     <FaRupeeSign className="detail-icon" />
-                    <span className="amount">{formatCurrency(bill.amount)}</span>
+                    <span className="amount">
+                      {formatCurrency(bill.amount)}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <FaCalendar className="detail-icon" />
@@ -415,12 +430,18 @@ const BillsDashboard = () => {
                   </div>
                 </div>
 
-                {daysUntilDue >= 0 && daysUntilDue <= 7 && bill.status === "pending" && (
-                  <div className="due-soon-badge">
-                    <FaExclamationTriangle />
-                    {daysUntilDue === 0 ? "Due Today" : `Due in ${daysUntilDue} day${daysUntilDue > 1 ? 's' : ''}`}
-                  </div>
-                )}
+                {daysUntilDue >= 0 &&
+                  daysUntilDue <= 7 &&
+                  bill.status === "pending" && (
+                    <div className="due-soon-badge">
+                      <FaExclamationTriangle />
+                      {daysUntilDue === 0
+                        ? "Due Today"
+                        : `Due in ${daysUntilDue} day${
+                            daysUntilDue > 1 ? "s" : ""
+                          }`}
+                    </div>
+                  )}
 
                 <div className="bill-actions">
                   <button
@@ -477,7 +498,7 @@ const BillsDashboard = () => {
       {totalPages > 1 && (
         <div className="pagination">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             className="pagination-btn"
           >
@@ -487,7 +508,9 @@ const BillsDashboard = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
             className="pagination-btn"
           >
