@@ -4,8 +4,10 @@ dotenv.config();
 // Enhanced error handling for module loading
 process.on("uncaughtException", (err) => {
   console.error("❌ Uncaught Exception:", err);
-  if (err.code === 'MODULE_NOT_FOUND') {
-    console.error("📦 Module not found error. This indicates a deployment issue.");
+  if (err.code === "MODULE_NOT_FOUND") {
+    console.error(
+      "📦 Module not found error. This indicates a deployment issue."
+    );
     console.error("🔍 Missing module:", err.message);
     console.error("📍 Stack:", err.stack);
     console.error("🛠️  Suggested fix: Clear cache and reinstall dependencies");
@@ -24,11 +26,11 @@ try {
   // Verify Express is properly installed
   const expressPath = require.resolve("express");
   console.log("✅ Express found at:", expressPath);
-  
+
   // Verify Express router exists
   const routerPath = require.resolve("express/lib/router");
   console.log("✅ Express router found at:", routerPath);
-  
+
   console.log("✅ Module verification passed");
 } catch (verifyError) {
   console.error("❌ Module verification failed:", verifyError.message);
