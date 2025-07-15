@@ -1,5 +1,21 @@
 import dotenv from "dotenv";
 dotenv.config();
+
+// Add error handling for module loading
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  if (err.code === 'MODULE_NOT_FOUND') {
+    console.error("Module not found error. This might be a deployment issue.");
+    console.error("Stack:", err.stack);
+  }
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
+
 import express from "express";
 import { app } from "./app.js";
 import { connectDB } from "./db/index.js";
