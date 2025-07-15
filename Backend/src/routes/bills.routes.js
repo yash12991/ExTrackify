@@ -1,5 +1,6 @@
-import { Router } from "express";
+import express from "express";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+
 import {
   createBill,
   getUserBills,
@@ -12,7 +13,7 @@ import {
   getMonthlyBillsTotal,
 } from "../controllers/bills.controller.js";
 
-const router = Router();
+const router = express.Router();
 
 // Apply JWT verification to all routes
 router.use(verifyJWT);
