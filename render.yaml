@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: expense-tracker-backend
+    env: node
+    buildCommand: npm ci && npm cache clean --force
+    startCommand: node ./src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.11.0
+    disk:
+      name: backend-disk
+      size: 2GB
+    plan: free
