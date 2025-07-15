@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js",
-    "build": "echo 'No build step required for Node.js'"
+    "build": "npm ci --production --silent",
+    "render-postbuild": "npm cache clean --force",
+    "deploy": "npm run build && npm start"
   },
   "keywords": [],
   "author": "",
