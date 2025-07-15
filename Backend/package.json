@@ -7,15 +7,18 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js",
-    "build": "rm -rf node_modules package-lock.json && npm install --production",
-    "render-postbuild": "npm cache clean --force"
+    "start:robust": "bash ./startup.sh",
+    "build": "npm ci --omit=dev && npm cache clean --force",
+    "render-build": "bash ./verify-build.sh",
+    "render-postbuild": "echo 'Build completed'",
+    "clean": "rm -rf node_modules package-lock.json && npm cache clean --force"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0 <25.0.0",
+    "node": ">=20.0.0",
     "npm": ">=10.0.0"
   },
   "dependencies": {

@@ -1,20 +1,42 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-// Add error handling for module loading
+// Enhanced error handling for module loading
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  if (err.code === 'MODULE_NOT_FOUND') {
-    console.error("Module not found error. This might be a deployment issue.");
-    console.error("Stack:", err.stack);
+  console.error("❌ Uncaught Exception:", err);
+  if (err.code === "MODULE_NOT_FOUND") {
+    console.error(
+      "📦 Module not found error. This indicates a deployment issue."
+    );
+    console.error("🔍 Missing module:", err.message);
+    console.error("📍 Stack:", err.stack);
+    console.error("🛠️  Suggested fix: Clear cache and reinstall dependencies");
   }
   process.exit(1);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
+
+// Module verification before import
+console.log("🔍 Verifying critical modules...");
+try {
+  // Verify Express is properly installed
+  const expressPath = require.resolve("express");
+  console.log("✅ Express found at:", expressPath);
+
+  // Verify Express router exists
+  const routerPath = require.resolve("express/lib/router");
+  console.log("✅ Express router found at:", routerPath);
+
+  console.log("✅ Module verification passed");
+} catch (verifyError) {
+  console.error("❌ Module verification failed:", verifyError.message);
+  console.error("🛠️  This indicates a corrupted Express installation");
+  process.exit(1);
+}
 
 import express from "express";
 import { app } from "./app.js";
