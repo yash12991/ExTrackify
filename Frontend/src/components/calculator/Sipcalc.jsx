@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./SipCalc.css";
+import "./Sipcalc.css";
 import {
   LineChart,
   Line,

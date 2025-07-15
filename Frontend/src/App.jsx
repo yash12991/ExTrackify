@@ -12,7 +12,7 @@ import Login from "./pages/Login/Login";
 import useAuthUser from "./hooks/useAuthUser";
 import Features from "./pages/Features/Features";
 import About from "./pages/About/About";
-import Signup from "./pages/SignUp/Signup";
+import Signup from "./pages/SignUp/SignUp";
 import DashBoard from "./pages/DashBoard/DashBoard";
 import SIPDashboard from "./pages/SIPDashboard/SIPDashboard";
 import SIPDetails from "./pages/SIPDetails/SIPDetails";

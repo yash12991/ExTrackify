@@ -2,8 +2,9 @@ services:
   - type: web
     name: expense-tracker-backend
     env: node
-    buildCommand: npm ci && npm cache clean --force
-    startCommand: node ./src/server.js
+    rootDir: Backend
+    buildCommand: bash ./verify-build.sh
+    startCommand: bash ./startup.sh
     envVars:
       - key: NODE_ENV
         value: production
