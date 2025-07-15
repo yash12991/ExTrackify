@@ -7,8 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js",
-    "build": "npm ci --omit=dev",
-    "render-build": "npm ci && npm cache clean --force",
+    "start:robust": "bash ./startup.sh",
+    "build": "npm ci --omit=dev && npm cache clean --force",
+    "render-build": "bash ./verify-build.sh",
     "render-postbuild": "echo 'Build completed'",
     "clean": "rm -rf node_modules package-lock.json && npm cache clean --force"
   },
