@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: expense-tracker-backend-fallback
+    env: node
+    rootDir: Backend
+    buildCommand: |
+      echo "🔄 Fallback deployment strategy..."
+      rm -rf node_modules package-lock.json .npm
+      npm cache clean --force
+      npm config set package-lock false
+      echo "📦 Installing with fallback strategy..."
+      npm install --production --legacy-peer-deps --force
+      npm install express@4.18.2 --save --force
+      npm install router@2.2.0 --save --force
+      echo "🔧 Fixing potential issues..."
+      npm dedupe
+      npm audit fix --force || true
+      echo "✅ Fallback build complete"
+    startCommand: npm run start:alternative
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: NPM_CONFIG_LEGACY_PEER_DEPS
+        value: true
+    plan: free

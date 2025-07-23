@@ -3,11 +3,13 @@ services:
     name: expense-tracker-backend
     env: node
     rootDir: Backend
-    buildCommand: npm install --production
+    buildCommand: npm run render-build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: 20.11.0
+      - key: NPM_CONFIG_FORCE
+        value: true
     plan: free
