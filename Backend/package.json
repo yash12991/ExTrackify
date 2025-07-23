@@ -8,8 +8,10 @@
     "dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js",
     "build": "npm ci --production",
-    "render-build": "npm install --production",
-    "clean": "rm -rf node_modules package-lock.json && npm cache clean --force"
+    "render-build": "rm -rf node_modules package-lock.json && npm cache clean --force && npm install --production --force && npm install express@4.18.2 --save --force",
+    "clean": "rm -rf node_modules package-lock.json && npm cache clean --force",
+    "postinstall": "node -e \"try { require('express/lib/router'); console.log('Express router: OK'); } catch(e) { console.log('Installing Express...'); require('child_process').execSync('npm install express@4.18.2 --force', {stdio: 'inherit'}); }\"",
+    "start:alternative": "node ./src/server_alternative.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +20,14 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "overrides": {
+    "express": {
+      "router": "2.2.0"
+    }
+  },
+  "resolutions": {
+    "router": "2.2.0"
   },
   "dependencies": {
     "axios": "^1.10.0",
