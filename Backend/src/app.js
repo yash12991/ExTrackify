@@ -23,7 +23,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routers
+
 import userRouter from "./routes/user.routes.js";
 import expensesRouter from "./routes/expense.routes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
