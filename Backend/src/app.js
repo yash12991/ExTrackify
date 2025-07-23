@@ -13,19 +13,49 @@ try {
 }
 
 
-app.use(
-  cors({
-    origin: "https://ex-trackify.vercel.app", // No '*'
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-// app.use(cors());
-// app.use(cors({
-//   origin: '*',         
-// credentials: true
-// }));
+app.use(express.json());
+
+// Configure CORS for production and development
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      "http://localhost:5173", // Vite dev server
+      "http://localhost:3000", // Alternative dev port
+      "https://ex-trackify.vercel.app", // Your Vercel deployment
+      process.env.CORS_ORIGIN, // Custom origin from env
+    ].filter(Boolean); // Remove null/undefined values
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("CORS blocked origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+};
+
+app.use(cors(corsOptions));
+
+// app.use(
+//   cors({
+//     origin: "https://ex-trackify.vercel.app", // No '*'
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+// // app.use(cors());
+// // app.use(cors({
+// //   origin: '*',         
+// // credentials: true
+// // }));
+// >>>>>>> master
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -47,7 +77,10 @@ import adminRoutes from "./routes/admin.routes.js";
 import goalRoutes from "./routes/goal.routes.js";
 import otpRoutes from "./routes/otp.routes.js";
 import billsRoutes from "./routes/bills.routes.js";
+import healthRoutes from "./routes/health.routes.js";
 
+// Health check route (should be first)
+app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/expenses", expensesRouter);
 app.use("/api/v1/budgets", budgetRoutes);
