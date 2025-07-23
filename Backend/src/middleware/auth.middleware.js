@@ -7,11 +7,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
     const token =
       req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer", "").trim();
-
+      req.header("Authorization")?.replace("Bearer ", "").trim();
 
     if (!token) {
-      // return res.status(401).json({message:"Unauthorised request"});
       throw new ApiError(401, "Unauthorised request");
     }
 
@@ -36,7 +34,7 @@ export const checksession = asyncHandler(async (req, res, next) => {
   try {
     const token =
       req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer", "").trim();
+      req.header("Authorization")?.replace("Bearer ", "").trim();
 
     if (token) {
       throw new ApiError(401, "User already logged in");

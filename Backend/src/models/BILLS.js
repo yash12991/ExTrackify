@@ -23,7 +23,15 @@ const BillsSchema = new Schema(
     },
     frequency: {
       type: String,
-      enum: ["one-time", "weekly", "monthly","3months","quaterly","6months", "yearly"],
+      enum: [
+        "one-time",
+        "weekly",
+        "monthly",
+        "3months",
+        "quarterly",
+        "6months",
+        "yearly",
+      ],
       default: "monthly",
     },
     category: {

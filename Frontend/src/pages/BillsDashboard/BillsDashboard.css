@@ -1,10 +1,11 @@
-/* Bills Dashboard Styles */
+/* Bills Dashboard Styles - Professional Orange & Black Theme */
 .bills-dashboard {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   min-height: 100vh;
+  color: #ffffff;
 }
 
 .dashboard-header {
@@ -31,7 +32,8 @@
 
 .title-icon {
   font-size: 1.8rem;
-  color: #ffd700;
+  color: #ff8c00;
+  filter: drop-shadow(0 2px 4px rgba(255, 140, 0, 0.3));
 }
 
 .add-bill-btn {
@@ -39,14 +41,14 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff8c00 0%, #ff7700 100%);
   border: none;
   border-radius: 25px;
   color: white;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
 }
 
 .add-bill-btn:hover {
