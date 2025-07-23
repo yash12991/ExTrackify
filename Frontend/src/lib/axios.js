@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "https://ex-trackify.vercel.app/api/v",
+  baseURL: "https://extrackify.onrender.com/api/v",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
