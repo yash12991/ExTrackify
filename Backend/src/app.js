@@ -12,7 +12,7 @@ try {
   process.exit(1);
 }
 
-app.use(express.json());
+
 app.use(
   cors({
     origin: "https://ex-trackify.vercel.app", // No '*'
