@@ -12,6 +12,7 @@ try {
   process.exit(1);
 }
 
+
 app.use(express.json());
 
 // Configure CORS for production and development
@@ -41,6 +42,21 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// app.use(
+//   cors({
+//     origin: "https://ex-trackify.vercel.app", // No '*'
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+// // app.use(cors());
+// // app.use(cors({
+// //   origin: '*',         
+// // credentials: true
+// // }));
+// >>>>>>> master
+
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
@@ -51,7 +67,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routers
+
 import userRouter from "./routes/user.routes.js";
 import expensesRouter from "./routes/expense.routes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
