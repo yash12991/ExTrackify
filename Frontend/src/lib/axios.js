@@ -24,39 +24,34 @@ const baseURL = getBaseURL();
 console.log("API Base URL:", baseURL);
 
 export const axiosInstance = axios.create({
-
   baseURL: baseURL,
-  withCredentials: true, // Enable credentials for CORS
-// =======
-//   baseURL: "https://extrackify-1.onrender.com/api/v1",
-//   withCredentials: true,
-// >>>>>>> master
+  withCredentials: true, // This is CRITICAL for cookies to work cross-origin
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Add request interceptor to include auth token if available
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// For cookie-based auth, we don't need to manually add Authorization headers
+// The browser will automatically include httpOnly cookies in requests
 
 // Add response interceptor for error handling
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ API Response:", response.config.url, response.status);
+    return response;
+  },
   (error) => {
+    console.error(
+      "❌ API Error:",
+      error.config?.url,
+      error.response?.status,
+      error.response?.data
+    );
+
     if (error.response?.status === 401) {
-      // Clear token and redirect to login if unauthorized
-      localStorage.removeItem("token");
+      // For cookie-based auth, just redirect to login
+      // Don't try to remove tokens from localStorage since we're using cookies
+      console.log("🔄 Unauthorized - redirecting to login");
       window.location.href = "/login";
     }
     return Promise.reject(error);

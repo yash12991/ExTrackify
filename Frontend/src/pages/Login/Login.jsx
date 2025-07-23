@@ -34,7 +34,6 @@ const Login = () => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
-      toast.error("Please fill in all fields");
       setError("Please fill in all fields");
       return;
     }
@@ -43,20 +42,23 @@ const Login = () => {
     setError("");
 
     try {
+      console.log("🔄 Attempting login...");
       const response = await login(formData);
-      // Invalidate and refetch auth query
-      await queryClient.invalidateQueries("auth");
-      await queryClient.refetchQueries("auth");
+      console.log("✅ Login successful:", response);
+
+      // For cookie-based auth, we don't need to store tokens manually
+      // The httpOnly cookie is automatically set by the browser
+
+      // Clear any cached data and redirect
+      queryClient.invalidateQueries();
       toast.success("Login successful!");
-      // Use replace to prevent going back to login page
-      navigate("/dashboard", { replace: true });
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
       const errorMessage =
-        error?.response?.data?.message ||
-        "Unable to login. Please check your credentials and try again.";
-      toast.error(errorMessage);
+        error.response?.data?.message || error.message || "Login failed";
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

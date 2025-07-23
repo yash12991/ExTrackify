@@ -12,12 +12,13 @@ try {
   process.exit(1);
 }
 
-
 app.use(express.json());
 
-// Configure CORS for production and development
+// Configure CORS for cookie-based authentication
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log("🔍 CORS Origin:", origin);
+
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
@@ -29,33 +30,22 @@ const corsOptions = {
     ].filter(Boolean); // Remove null/undefined values
 
     if (allowedOrigins.includes(origin)) {
+      console.log("✅ CORS allowed for:", origin);
       callback(null, true);
     } else {
-      console.log("CORS blocked origin:", origin);
+      console.log("❌ CORS blocked origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
+  credentials: true, // CRITICAL: Must be true for cookies to work
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  // Add these for better cookie support
+  optionsSuccessStatus: 200,
+  preflightContinue: false,
 };
 
 app.use(cors(corsOptions));
-
-// app.use(
-//   cors({
-//     origin: "https://ex-trackify.vercel.app", // No '*'
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-// // app.use(cors());
-// // app.use(cors({
-// //   origin: '*',         
-// // credentials: true
-// // }));
-// >>>>>>> master
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -64,9 +54,10 @@ app.use(cookieParser());
 // Add request logging middleware for debugging
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  console.log("🍪 Cookies:", req.cookies);
+  console.log("🔑 Authorization header:", req.headers.authorization);
   next();
 });
-
 
 import userRouter from "./routes/user.routes.js";
 import expensesRouter from "./routes/expense.routes.js";
