@@ -1,8 +1,31 @@
 import axios from "axios";
 
+// Get the base URL from environment variables or use default
+const getBaseURL = () => {
+  // Check if we have a custom API URL set
+  if (import.meta.env.VITE_API_URL) {
+    console.log('Using custom API URL:', import.meta.env.VITE_API_URL);
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Auto-detect based on environment
+  if (import.meta.env.PROD) {
+    // Production - deployed on Vercel
+    console.log('Production mode: Using Render backend');
+    return "https://ex-trackify.onrender.com/api/v1";
+  } else {
+    // Development - local server
+    console.log('Development mode: Using localhost backend');
+    return "http://localhost:3001/api/v1";
+  }
+};
+
+const baseURL = getBaseURL();
+console.log('API Base URL:', baseURL);
+
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:3001/api/v1",
-  withCredentials: true,
+  baseURL: baseURL,
+  withCredentials: true, // Enable credentials for CORS
   headers: {
     "Content-Type": "application/json",
   },
