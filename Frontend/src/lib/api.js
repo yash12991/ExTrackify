@@ -46,15 +46,10 @@ export const login = async ({ email, password }) => {
 export const logout = async () => {
   try {
     const response = await axiosInstance.post("/users/logout");
-    // Clear token from localStorage and axios headers
-    localStorage.removeItem("token");
     axiosInstance.defaults.headers.common["Authorization"] = "";
     return response.data;
   } catch (error) {
     console.error("Logout error:", error);
-    // Still clear local storage even if logout request fails
-    localStorage.removeItem("token");
-    axiosInstance.defaults.headers.common["Authorization"] = "";
     throw error;
   }
 };

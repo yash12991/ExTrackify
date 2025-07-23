@@ -14,17 +14,6 @@ import { checksession, verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// Debug route to test CORS and connection
-router.get("/debug", (req, res) => {
-  res.json({
-    message: "Debug endpoint working",
-    origin: req.get('Origin'),
-    headers: Object.keys(req.headers),
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
-
 // Authentication routes
 router.post("/register", checksession, registerUser);
 router.post("/login", checksession, login);

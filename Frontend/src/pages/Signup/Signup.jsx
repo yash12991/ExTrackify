@@ -156,11 +156,6 @@ const Signup = () => {
         password: formData.password,
       });
 
-      // Save the access token to localStorage
-      if (response.data?.accessToken) {
-        localStorage.setItem("token", response.data.accessToken);
-      }
-
       await queryClient.invalidateQueries("auth");
       toast.success("Registration successful!");
       navigate("/dashboard", { replace: true });

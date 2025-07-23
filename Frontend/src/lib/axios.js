@@ -34,24 +34,13 @@ export const axiosInstance = axios.create({
 // Add request interceptor to include auth token if available
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log("🔍 Making request to:", config.url);
-    console.log("🔍 Base URL:", config.baseURL);
-    
     const token = localStorage.getItem("token");
     if (token) {
-      console.log("🔍 Adding token to request:", token.substring(0, 20) + "...");
       config.headers.Authorization = `Bearer ${token}`;
-      // Also add as custom header for debugging
-      config.headers['X-Auth-Token'] = token;
-    } else {
-      console.log("🔍 No token found in localStorage");
     }
-    
-    console.log("🔍 Request headers:", config.headers);
     return config;
   },
   (error) => {
-    console.error("🔍 Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
