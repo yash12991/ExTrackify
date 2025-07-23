@@ -136,8 +136,8 @@ const Signup = () => {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
 
-    if (!otp) {
-      toast.error("Please enter the OTP");
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
@@ -145,25 +145,28 @@ const Signup = () => {
     setError("");
 
     try {
-      // Verify OTP first
-      const verifyResponse = await verifyOtp(formData.email, otp);
-      console.log("OTP verified successfully:", verifyResponse);
+      console.log("🔄 Verifying OTP and registering...");
 
-      // If OTP is valid, proceed with registration
-      const response = await register({
-        name: formData.name, // Changed from 'fullname' to 'name'
-        email: formData.email,
-        password: formData.password,
-      });
+      // First verify OTP
+      await verifyOtp(formData.email, otp);
+      console.log("✅ OTP verified");
 
-      await queryClient.invalidateQueries("auth");
+      // Then register the user
+      const response = await register(formData);
+      console.log("✅ Registration successful:", response);
+
+      // For cookie-based auth, we don't need to store tokens manually
+      // The httpOnly cookie is automatically set by the browser
+
+      queryClient.invalidateQueries();
       toast.success("Registration successful!");
-      navigate("/dashboard", { replace: true });
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Verification/Registration error:", error);
-      const errorMessage = error.message || "Failed to verify OTP or register";
-      toast.error(errorMessage);
+      console.error("❌ Registration error:", error);
+      const errorMessage =
+        error.response?.data?.message || error.message || "Registration failed";
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -305,7 +308,6 @@ const Signup = () => {
                   textAlign: "center",
                   letterSpacing: "2px",
                   fontSize: "1.2rem",
-                  
                 }}
               />
             </div>
@@ -322,13 +324,12 @@ const Signup = () => {
                 disabled={isLoading || resendDisabled}
                 style={{
                   background: "none",
-              
+
                   border: "none",
                   color: resendDisabled ? "#ccc" : "#667eea",
                   textDecoration: "underline",
                   cursor: resendDisabled ? "not-allowed" : "pointer",
-                  padding:"0",
-
+                  padding: "0",
                 }}
               >
                 {resendDisabled
