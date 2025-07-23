@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
@@ -6,6 +6,12 @@ import { register, sendOtp, verifyOtp } from "../../lib/api";
 import Loader from "../../components/Loading/Loading";
 
 const Signup = () => {
+  const [mincount, setminCount] = useState(5);
+  const [seccount, setsecCount] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
+  const [resenttimer, setresenttimer] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(false);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
@@ -17,8 +23,53 @@ const Signup = () => {
     password: "",
     confirmPassword: "",
   });
+
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+
+  useEffect(() => {
+    let retimer;
+
+    if (resendDisabled && resenttimer > 0) {
+      retimer = setTimeout(() => {
+        setresenttimer((prevCount) => prevCount - 1);
+      }, 1000);
+    } else if (resenttimer === 0) {
+      setResendDisabled(false);
+    }
+
+    return () => clearTimeout(retimer);
+  }, [resenttimer, resendDisabled]);
+
+  const startresendcountdown = () => {
+    setresenttimer(30);
+    setResendDisabled(true);
+  };
+
+  useEffect(() => {
+    let timer;
+
+    if (timerActive) {
+      if (seccount > 0) {
+        timer = setTimeout(() => {
+          setsecCount((prevCount) => prevCount - 1);
+        }, 1000);
+      } else if (mincount > 0) {
+        setminCount((prevCount) => prevCount - 1);
+        setsecCount(59);
+      } else {
+        setTimerActive(false);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [mincount, seccount, timerActive]);
+
+  const startCountdown = () => {
+    setminCount(5);
+    setsecCount(0);
+    setTimerActive(true);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,6 +113,8 @@ const Signup = () => {
       toast.success("OTP sent to your email!");
       setStep(2);
       setOtpSent(true);
+      startCountdown();
+      startresendcountdown();
     } catch (error) {
       console.error("Send OTP error:", error);
       const errorMessage = error.message || "Failed to send OTP";
@@ -117,11 +170,15 @@ const Signup = () => {
   };
 
   const resendOtp = async () => {
+    if (resendDisabled) return;
+
     try {
       setIsLoading(true);
       setError("");
       await sendOtp(formData.email);
       toast.success("OTP resent successfully!");
+      startCountdown();
+      startresendcountdown();
     } catch (error) {
       console.error("Resend OTP error:", error);
       const errorMessage = error.message || "Failed to resend OTP";
@@ -227,7 +284,9 @@ const Signup = () => {
       <div className="form-container">
         <div className="left-container">
           <h1>Verify OTP</h1>
-          <p>We've sent a 6-digit OTP to {formData.email}</p>
+          <p style={{ textAlign: "center" }}>
+            We've sent a 6-digit OTP to {formData.email}
+          </p>
           {error && <div className="error-message">{error}</div>}
           <form onSubmit={handleVerifyOtp}>
             <div className="form-group">
@@ -246,6 +305,7 @@ const Signup = () => {
                   textAlign: "center",
                   letterSpacing: "2px",
                   fontSize: "1.2rem",
+                  
                 }}
               />
             </div>
@@ -258,17 +318,29 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={resendOtp}
-                disabled={isLoading}
+                className="bg-zinc-300 rounded"
+                disabled={isLoading || resendDisabled}
                 style={{
                   background: "none",
+              
                   border: "none",
-                  color: "#667eea",
+                  color: resendDisabled ? "#ccc" : "#667eea",
                   textDecoration: "underline",
-                  cursor: "pointer",
+                  cursor: resendDisabled ? "not-allowed" : "pointer",
+                  padding:"0",
+
                 }}
               >
-                Resend OTP
+                {resendDisabled
+                  ? `Resend OTP in ${resenttimer}s`
+                  : "Resend OTP"}
               </button>
+              {timerActive && (
+                <p style={{ margin: "0.5rem 0", color: "#666" }}>
+                  OTP expires in: {mincount}:
+                  {seccount.toString().padStart(2, "0")}
+                </p>
+              )}
             </div>
 
             <div style={{ textAlign: "center", marginTop: "1rem" }}>

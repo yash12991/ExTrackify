@@ -21,22 +21,6 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 // Module verification before import
-console.log("🔍 Verifying critical modules...");
-try {
-  // Verify Express is properly installed
-  const expressPath = require.resolve("express");
-  console.log("✅ Express found at:", expressPath);
-
-  // Verify Express router exists
-  const routerPath = require.resolve("express/lib/router");
-  console.log("✅ Express router found at:", routerPath);
-
-  console.log("✅ Module verification passed");
-} catch (verifyError) {
-  console.error("❌ Module verification failed:", verifyError.message);
-  console.error("🛠️  This indicates a corrupted Express installation");
-  process.exit(1);
-}
 
 import express from "express";
 import { app } from "./app.js";

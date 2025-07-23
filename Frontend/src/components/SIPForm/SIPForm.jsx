@@ -41,14 +41,49 @@ const SIPForm = ({
     const amount = parseFloat(formData.amount) || 0;
     const rate = parseFloat(formData.expectedRate) || 0;
     const duration = parseInt(formData.durationInMonths) || 0;
+    const frequency = formData.frequency || "monthly";
 
     if (!amount || !rate || !duration) return 0;
 
-    const monthlyRate = rate / 12 / 100;
-    const maturityValue =
-      amount *
-      (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-        (1 + monthlyRate));
+    let maturityValue = 0;
+
+    switch (frequency) {
+      case "monthly": {
+        const monthlyRate = rate / 12 / 100;
+        maturityValue =
+          amount *
+          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
+            (1 + monthlyRate));
+        break;
+      }
+      case "quarterly": {
+        const quarterlyRate = rate / 4 / 100;
+        const quarterlyDuration = Math.ceil(duration / 3);
+        maturityValue =
+          amount *
+          (((Math.pow(1 + quarterlyRate, quarterlyDuration) - 1) /
+            quarterlyRate) *
+            (1 + quarterlyRate));
+        break;
+      }
+      case "yearly": {
+        const annualRate = rate / 100;
+        const yearlyDuration = Math.ceil(duration / 12);
+        maturityValue =
+          amount *
+          (((Math.pow(1 + annualRate, yearlyDuration) - 1) / annualRate) *
+            (1 + annualRate));
+        break;
+      }
+      default: {
+        const defaultMonthlyRate = rate / 12 / 100;
+        maturityValue =
+          amount *
+          (((Math.pow(1 + defaultMonthlyRate, duration) - 1) /
+            defaultMonthlyRate) *
+            (1 + defaultMonthlyRate));
+      }
+    }
 
     return maturityValue;
   };
@@ -152,20 +187,29 @@ const SIPForm = ({
               <div className="form-group">
                 <label htmlFor="durationInMonths">
                   <FaClock className="form-icon" />
-                  Duration
+                  Investment Duration *
                 </label>
                 <select
                   id="durationInMonths"
                   name="durationInMonths"
                   value={formData.durationInMonths}
                   onChange={handleInputChange}
+                  required
                 >
-                  <option value={6}>6 Months</option>
+                  <option value="">Select Duration</option>
+                  <option value={6}>6 Months (Short Term)</option>
                   <option value={12}>1 Year</option>
+                  <option value={18}>1.5 Years</option>
                   <option value={24}>2 Years</option>
-                  <option value={36}>3 Years</option>
-                  <option value={60}>5 Years</option>
-                  <option value={120}>30 Years</option>
+                  <option value={36}>3 Years (Recommended)</option>
+                  <option value={48}>4 Years</option>
+                  <option value={60}>5 Years (Long Term)</option>
+                  <option value={84}>7 Years</option>
+                  <option value={120}>10 Years</option>
+                  <option value={180}>15 Years</option>
+                  <option value={240}>20 Years</option>
+                  <option value={300}>25 Years</option>
+                  <option value={360}>30 Years (Retirement)</option>
                 </select>
               </div>
             </div>

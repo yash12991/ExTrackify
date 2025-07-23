@@ -45,7 +45,7 @@ const SIPDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSIP, setEditingSIP] = useState(null);
   const [filter, setFilter] = useState("all"); // all, active, inactive
-  const [displaycalc,setDisplayCalc] = useState("false");
+  const [displaycalc, setDisplayCalc] = useState("false");
   const [createFormData, setCreateFormData] = useState({
     sipName: "",
     amount: "",
@@ -98,32 +98,96 @@ const SIPDashboard = () => {
     const amount = parseFloat(createFormData.amount) || 0;
     const rate = parseFloat(createFormData.expectedRate) || 0;
     const duration = parseInt(createFormData.durationInMonths) || 0;
+    const frequency = createFormData.frequency || "monthly";
 
     if (!amount || !rate || !duration) return 0;
 
-    const monthlyRate = rate / 12 / 100;
-    const maturityValue =
-      amount *
-      (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-        (1 + monthlyRate));
-
-    return maturityValue;
+    switch (frequency) {
+      case "monthly": {
+        const monthlyRate = rate / 12 / 100;
+        return (
+          amount *
+          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
+            (1 + monthlyRate))
+        );
+      }
+      case "quarterly": {
+        const quarterlyRate = rate / 4 / 100;
+        const quarterlyDuration = Math.ceil(duration / 3);
+        return (
+          amount *
+          (((Math.pow(1 + quarterlyRate, quarterlyDuration) - 1) /
+            quarterlyRate) *
+            (1 + quarterlyRate))
+        );
+      }
+      case "yearly": {
+        const annualRate = rate / 100;
+        const yearlyDuration = Math.ceil(duration / 12);
+        return (
+          amount *
+          (((Math.pow(1 + annualRate, yearlyDuration) - 1) / annualRate) *
+            (1 + annualRate))
+        );
+      }
+      default: {
+        const defaultMonthlyRate = rate / 12 / 100;
+        return (
+          amount *
+          (((Math.pow(1 + defaultMonthlyRate, duration) - 1) /
+            defaultMonthlyRate) *
+            (1 + defaultMonthlyRate))
+        );
+      }
+    }
   };
 
   const calculateEditExpectedMaturity = () => {
     const amount = parseFloat(editFormData.amount) || 0;
     const rate = parseFloat(editFormData.expectedRate) || 0;
     const duration = parseInt(editFormData.durationInMonths) || 0;
+    const frequency = editFormData.frequency || "monthly";
 
     if (!amount || !rate || !duration) return 0;
 
-    const monthlyRate = rate / 12 / 100;
-    const maturityValue =
-      amount *
-      (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
-        (1 + monthlyRate));
-
-    return maturityValue;
+    switch (frequency) {
+      case "monthly": {
+        const monthlyRate = rate / 12 / 100;
+        return (
+          amount *
+          (((Math.pow(1 + monthlyRate, duration) - 1) / monthlyRate) *
+            (1 + monthlyRate))
+        );
+      }
+      case "quarterly": {
+        const quarterlyRate = rate / 4 / 100;
+        const quarterlyDuration = Math.ceil(duration / 3);
+        return (
+          amount *
+          (((Math.pow(1 + quarterlyRate, quarterlyDuration) - 1) /
+            quarterlyRate) *
+            (1 + quarterlyRate))
+        );
+      }
+      case "yearly": {
+        const annualRate = rate / 100;
+        const yearlyDuration = Math.ceil(duration / 12);
+        return (
+          amount *
+          (((Math.pow(1 + annualRate, yearlyDuration) - 1) / annualRate) *
+            (1 + annualRate))
+        );
+      }
+      default: {
+        const defaultMonthlyRate = rate / 12 / 100;
+        return (
+          amount *
+          (((Math.pow(1 + defaultMonthlyRate, duration) - 1) /
+            defaultMonthlyRate) *
+            (1 + defaultMonthlyRate))
+        );
+      }
+    }
   };
 
   const handleCreateSIP = async (e) => {
@@ -212,35 +276,44 @@ const SIPDashboard = () => {
     );
   }
 
-
-
-
   return (
     <div className="sip-dashboard">
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-content">
-          <img src="./image.png" alt="logo" style={{width:"60px"}}/>
+          <img src="./image.png" alt="logo" style={{ width: "60px" }} />
           <h1>SIP Dashboard</h1>
           <p>Manage your Systematic Investment Plans</p>
         </div>
 
-      <div className="Nav-btn">
-        <button className="back-bt "  onClick={()=>navigate("/dashboard")}><FaBackward/></button>
-        <button className="calc-btn" onClick={()=>setDisplayCalc(displaycalc===true?false:true)} ><FaCalculator/>
-          Calculator
-        </button>
-        <button className="create-btn" onClick={() => setShowCreateModal(true)}>
-          <FaPlus /> Create New
-        </button>
-        
+        <div className="Nav-btn">
+          <button className="back-bt " onClick={() => navigate("/dashboard")}>
+            <FaBackward />
+          </button>
+          <button
+            className="calc-btn"
+            onClick={() => setDisplayCalc(displaycalc === true ? false : true)}
+          >
+            <FaCalculator />
+            Calculator
+          </button>
+          <button
+            className="create-btn"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <FaPlus /> Create New
+          </button>
         </div>
       </div>
 
-              {displaycalc===true? <Sipcalc onClose ={()=>setDisplayCalc(false)}/>:" "}
+      {displaycalc === true ? (
+        <Sipcalc onClose={() => setDisplayCalc(false)} />
+      ) : (
+        " "
+      )}
       {/* Summary Cards */}
       {summary && (
-        <div className="summary-grid" style={{marginTop:"45px"}}>
+        <div className="summary-grid" style={{ marginTop: "45px" }}>
           <div className="summary-card">
             <div className="card-icon">
               <FaPiggyBank />

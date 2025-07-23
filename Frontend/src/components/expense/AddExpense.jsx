@@ -40,30 +40,40 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
   ];
 
   const paymentModes = [
-    { value: "card", label: "Card" },
     { value: "upi", label: "UPI" },
+    { value: "credit card", label: "Credit Card" },
+    { value: "debit card", label: "Debit Card" },
     { value: "cash", label: "Cash" },
     { value: "netbanking", label: "Net Banking" },
     { value: "cheque", label: "Cheque" },
+    { value: "other", label: "Other" },
   ];
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.amount || Number(formData.amount) <= 0) {
-      newErrors.amount = "Please enter a valid amount";
+      newErrors.amount = "Please enter a valid amount greater than 0";
     }
 
-    if (!formData.category) {
+    if (!formData.category.trim()) {
       newErrors.category = "Please select a category";
     }
 
-    if (!formData.modeofpayment) {
+    if (!formData.modeofpayment.trim()) {
       newErrors.modeofpayment = "Please select a payment mode";
     }
 
     if (!formData.date) {
       newErrors.date = "Please select a date";
+    } else {
+      const selectedDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+
+      if (selectedDate > today) {
+        newErrors.date = "Date cannot be in the future";
+      }
     }
 
     setErrors(newErrors);
