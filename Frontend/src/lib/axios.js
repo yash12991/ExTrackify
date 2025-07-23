@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "https://extrackify.onrender.com/api/v",
+  baseURL: "https://extrackify.onrender.com/api/v1",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
