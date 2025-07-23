@@ -3,14 +3,11 @@ services:
     name: expense-tracker-backend
     env: node
     rootDir: Backend
-    buildCommand: bash ./verify-build.sh
-    startCommand: bash ./startup.sh
+    buildCommand: npm install --production
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: 20.11.0
-    disk:
-      name: backend-disk
-      size: 2GB
     plan: free
