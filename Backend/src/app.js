@@ -61,7 +61,10 @@ import adminRoutes from "./routes/admin.routes.js";
 import goalRoutes from "./routes/goal.routes.js";
 import otpRoutes from "./routes/otp.routes.js";
 import billsRoutes from "./routes/bills.routes.js";
+import healthRoutes from "./routes/health.routes.js";
 
+// Health check route (should be first)
+app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/expenses", expensesRouter);
 app.use("/api/v1/budgets", budgetRoutes);

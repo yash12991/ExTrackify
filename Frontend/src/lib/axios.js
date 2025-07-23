@@ -12,7 +12,7 @@ const getBaseURL = () => {
   if (import.meta.env.PROD) {
     // Production - deployed on Vercel
     console.log('Production mode: Using Render backend');
-    return "https://ex-trackify.onrender.com/api/v1";
+    return "https://extrackify-1.onrender.com/api/v1";
   } else {
     // Development - local server
     console.log('Development mode: Using localhost backend');
