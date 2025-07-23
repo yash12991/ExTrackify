@@ -44,6 +44,12 @@ const Login = () => {
 
     try {
       const response = await login(formData);
+      
+      // Save the access token to localStorage
+      if (response.data?.accessToken) {
+        localStorage.setItem("token", response.data.accessToken);
+      }
+      
       // Invalidate and refetch auth query
       await queryClient.invalidateQueries("auth");
       await queryClient.refetchQueries("auth");

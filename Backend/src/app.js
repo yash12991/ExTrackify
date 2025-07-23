@@ -17,26 +17,50 @@ app.use(express.json());
 // Configure CORS for production and development
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log("🔍 CORS Request from origin:", origin);
+    
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log("✅ CORS: Allowing request with no origin");
+      return callback(null, true);
+    }
 
     const allowedOrigins = [
       "http://localhost:5173", // Vite dev server
       "http://localhost:3000", // Alternative dev port
       "https://ex-trackify.vercel.app", // Your Vercel deployment
+      "https://expense-tracker-frontend.vercel.app", // Alternative Vercel URL
       process.env.CORS_ORIGIN, // Custom origin from env
     ].filter(Boolean); // Remove null/undefined values
 
+    console.log("🔍 CORS: Allowed origins:", allowedOrigins);
+
     if (allowedOrigins.includes(origin)) {
+      console.log("✅ CORS: Origin allowed");
       callback(null, true);
     } else {
-      console.log("CORS blocked origin:", origin);
-      callback(new Error("Not allowed by CORS"));
+      console.log("❌ CORS: Origin blocked:", origin);
+      // In production, be more permissive for now
+      if (process.env.NODE_ENV === 'production') {
+        console.log("🚨 Production mode: Allowing origin temporarily");
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  allowedHeaders: [
+    "Content-Type", 
+    "Authorization", 
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "Access-Control-Request-Method",
+    "Access-Control-Request-Headers"
+  ],
+  exposedHeaders: ["Set-Cookie"],
 };
 
 app.use(cors(corsOptions));
