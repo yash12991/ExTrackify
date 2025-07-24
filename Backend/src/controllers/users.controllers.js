@@ -72,6 +72,8 @@ const registerUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "None", // Added for consistency
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
   return res
@@ -124,7 +126,7 @@ const login = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "None",       // required for cross-site cookies
+    sameSite: "None", // required for cross-site cookies
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
@@ -151,10 +153,14 @@ const logout = asyncHandler(async (req, res) => {
     { $set: { refreshToken: "" } },
     { new: true }
   );
+
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "None", // This was missing! Required for cross-origin cookies
+    maxAge: 0, // This ensures immediate expiration
   };
+
   return res
     .status(200)
     .clearCookie("accessToken", options)
@@ -180,11 +186,12 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Invalid refresh token");
     }
     const accessToken = user.generateAccessToken();
-    // Optionally, you can also generate a new refresh token here and update user.refreshToken
 
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "None", // Added this for consistency
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
     return res
