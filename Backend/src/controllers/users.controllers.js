@@ -104,8 +104,8 @@ const getCookieOptions = (req) => {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: isMobile ? "Lax" : "None", // Use Lax for mobile
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // None for production, Lax for development
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: "/",
   };
 };
