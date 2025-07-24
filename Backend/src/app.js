@@ -25,7 +25,8 @@ const corsOptions = {
     const allowedOrigins = [
       "http://localhost:5173", // Vite dev server
       "http://localhost:3000", // Alternative dev port
-      "https://ex-trackify.vercel.app", // Your Vercel deployment
+      "https://ex-trackify.vercel.app",
+      "https://extrackify.netlify.app",   // Your Vercel deployment
       process.env.CORS_ORIGIN, // Custom origin from env
     ].filter(Boolean); // Remove null/undefined values
 
