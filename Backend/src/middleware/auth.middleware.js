@@ -5,22 +5,24 @@ import { User } from "../models/Users.models.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
-    // Debug logging for token extraction
     console.log("🔍 Headers:", req.headers.authorization);
     console.log("🔍 Cookies:", req.cookies);
+    console.log("🔍 User Agent:", req.headers["user-agent"]);
 
+    // Try multiple token extraction methods for mobile compatibility
     const token =
       req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "").trim();
+      req.header("Authorization")?.replace("Bearer ", "").trim() ||
+      req.headers["x-auth-token"] || // Alternative header for mobile
+      req.body.token; // Fallback from request body
 
     console.log("🔍 Extracted token:", token ? "Present" : "Missing");
 
     if (!token) {
       console.log("❌ No token found in request");
-      throw new ApiError(401, "Unauthorised request");
+      throw new ApiError(401, "Unauthorized request");
     }
 
-    // Check if ACCESS_TOKEN_SECRET exists
     if (!process.env.ACCESS_TOKEN_SECRET) {
       console.error("❌ ACCESS_TOKEN_SECRET not found in environment");
       throw new ApiError(500, "Server configuration error");
@@ -41,11 +43,10 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
     console.log("✅ User verified:", user.email);
     req.user = user;
-
-    next(); // <-- This is required!
+    next();
   } catch (error) {
     console.error("❌ JWT verification error:", error.message);
-    throw new ApiError(401, error?.message || "Invalid access token");
+    throw new ApiError(401, error?.message || "Invalid token");
   }
 });
 

@@ -72,8 +72,11 @@ const registerUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "None", // Added for consistency
+    sameSite: "None", // This can be problematic on mobile
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    // Add mobile-friendly options
+    domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+    path: "/",
   };
 
   return res
@@ -93,12 +96,24 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+// Helper function to get mobile-friendly cookie options
+const getCookieOptions = (req) => {
+  const userAgent = req.headers["user-agent"] || "";
+  const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
+
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: isMobile ? "Lax" : "None", // Use Lax for mobile
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
+  };
+};
+
 const login = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
   if (!(username || email)) {
-    // throw new ApiError(400, "user name or email is required");
-    res.status(404).json({ message: "Username or email is required" });
-    return;
+    return res.status(400).json({ message: "Username or email is required" });
   }
 
   const user = await User.findOne({
@@ -106,29 +121,24 @@ const login = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
-    // throw new ApiError(401, "user not exist");
     return res
       .status(404)
-      .json({ message: "user with given username or password not exist" });
+      .json({ message: "User with given username or email does not exist" });
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
   if (!isPasswordValid) {
-    // throw new ApiError(401, "incorrect password");
-    return res.status(404).json({ message: "incorrect password" });
+    return res.status(401).json({ message: "Incorrect password" });
   }
+
   const { accessToken, refreshToken } =
     await generateAccessTokenandRefreshToken(user._id);
-
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None", // required for cross-site cookies
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  };
+
+  // Use mobile-friendly cookie options
+  const options = getCookieOptions(req);
 
   return res
     .status(200)
@@ -142,7 +152,7 @@ const login = asyncHandler(async (req, res) => {
           accessToken,
           refreshToken,
         },
-        "user logged in successfully"
+        "User logged in successfully"
       )
     );
 });
@@ -154,19 +164,16 @@ const logout = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None", // This was missing! Required for cross-origin cookies
-    maxAge: 0, // This ensures immediate expiration
-  };
+  const options = getCookieOptions(req);
+  options.maxAge = 0; // Immediate expiration
 
   return res
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "user Logged out"));
+    .json(new ApiResponse(200, {}, "User logged out"));
 });
+
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const IncomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
