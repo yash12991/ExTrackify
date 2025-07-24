@@ -37,6 +37,7 @@ const Login = () => {
     );
   };
 
+  // Only if cookies fail on mobile, then fallback to localStorage
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,16 +54,20 @@ const Login = () => {
       const response = await login(formData);
       console.log("✅ Login successful:", response);
 
-      // For mobile devices, manually save tokens
-      if (isMobileDevice() && response.data?.accessToken) {
-        localStorage.setItem("accessToken", response.data.accessToken);
-        if (response.data.refreshToken) {
-          localStorage.setItem("refreshToken", response.data.refreshToken);
+      // Check if cookies were set successfully
+      // If not (mobile browser blocking), fallback to localStorage
+      setTimeout(() => {
+        if (
+          !document.cookie.includes("accessToken") &&
+          response.data?.accessToken
+        ) {
+          console.log("📱 Cookies blocked, using localStorage fallback");
+          localStorage.setItem("accessToken", response.data.accessToken);
         }
-      }
+      }, 100);
 
-      // For cookie-based auth, we don't need to store tokens manually
-      // The httpOnly cookie is automatically set by the browser
+      // The backend automatically sets httpOnly cookies for both PC and mobile
+      // No manual token storage needed - cookies work on both platforms
 
       // Clear any cached data and redirect
       queryClient.invalidateQueries();
