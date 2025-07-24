@@ -30,6 +30,13 @@ const Login = () => {
     if (error) setError("");
   };
 
+  // Add mobile detection and token handling
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,9 +49,17 @@ const Login = () => {
     setError("");
 
     try {
-      console.log("🔄 Attempting login...");
+      console.log("🔄 Attempting login...", { isMobile: isMobileDevice() });
       const response = await login(formData);
       console.log("✅ Login successful:", response);
+
+      // For mobile devices, manually save tokens
+      if (isMobileDevice() && response.data?.accessToken) {
+        localStorage.setItem("accessToken", response.data.accessToken);
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
+      }
 
       // For cookie-based auth, we don't need to store tokens manually
       // The httpOnly cookie is automatically set by the browser
