@@ -79,7 +79,7 @@
 
 .stat-card {
   position: relative;
-  background: white;
+  background: rgb(129, 115, 115);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -132,7 +132,7 @@
 }
 
 .chart-card {
-  background: white;
+  background: rgb(139, 126, 126);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
