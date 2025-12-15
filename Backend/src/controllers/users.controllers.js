@@ -72,10 +72,8 @@ const registerUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "None", // This can be problematic on mobile
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    // Add mobile-friendly options
-    domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
     path: "/",
   };
 
@@ -194,12 +192,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
     const accessToken = user.generateAccessToken();
 
-    const options = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None", // Added this for consistency
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    };
+    const options = getCookieOptions(req);
 
     return res
       .status(200)

@@ -23,14 +23,14 @@
   position: relative;
 }
 
-.expense-form::before {
+.expense-modal-content::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ff6b00, #ff8533, #ffaa66);
+  height: 5px;
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff);
   border-radius: 20px 20px 0 0;
 }
 
@@ -203,14 +203,14 @@
 }
 
 .checkbox-label:hover {
-  border-color: #ff6b00;
+  border-color: #00d2ff;
   background: white;
 }
 
 .checkbox-label input[type="checkbox"] {
   width: 20px;
   height: 20px;
-  accent-color: #ff6b00;
+  accent-color: #00d2ff;
   cursor: pointer;
 }
 
@@ -246,7 +246,7 @@
   padding: 14px 28px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #ff6b00, #ff8533);
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
   color: white;
   cursor: pointer;
   font-weight: 600;
@@ -255,13 +255,13 @@
   gap: 8px;
   transition: all 0.3s ease;
   font-size: 14px;
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e55a00, #ff6b00);
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
 }
 
 .submit-btn:disabled {

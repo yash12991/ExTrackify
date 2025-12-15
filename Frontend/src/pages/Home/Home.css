@@ -55,7 +55,7 @@ body, .homePage {
 
 .home-link {
   display: inline-block;
-  background: #e25a5a;
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
   color: #fff;
   border: none;
   border-radius: 22px;
@@ -67,14 +67,16 @@ body, .homePage {
   letter-spacing: 1px;
   text-decoration: none;
   margin-top: 24px;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px #0006;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
   position: relative;
   overflow: hidden;
 }
 
 .home-link:hover {
-  background: #b13b3b;
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
 }
 
 .homePage {
@@ -89,7 +91,7 @@ body, .homePage {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.15) 0%, transparent 50%);
   animation: pulse 8s ease infinite;
 }
 

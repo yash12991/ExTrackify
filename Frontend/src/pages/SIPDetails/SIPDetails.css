@@ -1,7 +1,7 @@
-/* SIP Details Page Styles - Professional Orange & Black Theme */
+/* SIP Details Page Styles - Modern Teal-Blue Theme */
 .sip-details-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
   padding: 20px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: #ffffff;
@@ -9,15 +9,15 @@
 
 /* Header Styles */
 .sip-header {
-  background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(26, 26, 26, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(0, 210, 255, 0.1) 0%, rgba(15, 32, 39, 0.9) 100%);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 30px;
   margin-bottom: 30px;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 140, 0, 0.2);
-  border: 1px solid rgba(255, 140, 0, 0.2);
+    0 0 0 1px rgba(0, 210, 255, 0.2);
+  border: 1px solid rgba(0, 210, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -33,7 +33,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #ff8c00, #ff7700, #ff6600, #ff5500);
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff, #3a7bd5);
   background-size: 300% 100%;
   animation: gradientShift 3s ease-in-out infinite;
 }
@@ -53,7 +53,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #ff8c00, #ff7700);
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
   color: white;
   border: none;
   padding: 12px 20px;
@@ -63,18 +63,19 @@
   transition: all 0.3s ease;
   font-size: 14px;
   width: fit-content;
-  box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 210, 255, 0.4);
 }
 
 .back-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(255, 140, 0, 0.4);
+  box-shadow: 0 12px 25px rgba(0, 210, 255, 0.5);
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
 }
 
 .sip-title h1 {
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff8c00, #ffffff);
+  background: linear-gradient(135deg, #00d2ff, #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

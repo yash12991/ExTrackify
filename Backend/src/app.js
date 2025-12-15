@@ -67,7 +67,7 @@ import sipRoutes from "./routes/sip.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import goalRoutes from "./routes/goal.routes.js";
-import otpRoutes from "./routes/otp.routes.js";
+// import otpRoutes from "./routes/otp.routes.js"; // OTP disabled - email service not available
 import billsRoutes from "./routes/bills.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 
@@ -80,7 +80,7 @@ app.use("/api/v1/sip", sipRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/goals", goalRoutes);
-app.use("/api/v1/otp", otpRoutes);
+// app.use("/api/v1/otp", otpRoutes); // OTP disabled - email service not available
 app.use("/api/v1/bills", billsRoutes);
 
 // Add error handling middleware

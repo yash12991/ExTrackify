@@ -28,6 +28,22 @@ export const axiosInstance = axios.create({
   },
 });
 
+// Request interceptor to add localStorage token if available
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Check if token exists in localStorage (fallback for mobile)
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log("🔑 Added localStorage token to request");
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Simple response interceptor for error handling
 axiosInstance.interceptors.response.use(
   (response) => {

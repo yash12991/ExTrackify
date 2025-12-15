@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { register } from "../../lib/api";
+import { register, sendOtp, verifyOtp } from "../../lib/api";
 import Loader from "../../components/Loading/Loading";
 import "./Signup.css";
 import img from "../../assets/image.png";
 
 const Signup = () => {
+  const [mincount, setminCount] = useState(5);
+  const [seccount, setsecCount] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
+  const [resenttimer, setresenttimer] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(false);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [step, setStep] = useState(1); // 1: form, 2: OTP verification
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -80,6 +87,66 @@ const Signup = () => {
   };
 
   return (
+    return (
+      <div className="signup-page">
+        {isLoading && <Loader />}
+        
+        <div className="signup-container">
+          <div className="signup-left">
+            <div className="signup-brand" onClick={() => navigate("/")}>
+              <img src={img} alt="ExTrackify Logo" className="brand-logo" />
+              <h1 className="brand-name">EXTRAKIFY</h1>
+            </div>
+            
+            <div className="signup-illustration">
+              <div className="floating-card">
+                <div className="card-icon">🚀</div>
+                <p>Get Started Fast</p>
+              </div>
+              <div className="floating-card">
+                <div className="card-icon">🔐</div>
+                <p>Secure & Private</p>
+              </div>
+              <div className="floating-card">
+                <div className="card-icon">📱</div>
+                <p>Access Anywhere</p>
+              </div>
+            </div>
+            
+            <div className="signup-tagline">
+              <h2>Join ExTrackify Today</h2>
+              <p>Create your account and start managing your finances like a pro</p>
+            </div>
+          </div>
+
+          <div className="signup-right">
+            <div className="signup-form-wrapper">
+              <div className="signup-header">
+                <h1>Create Account</h1>
+                <p>Fill in your details to get started</p>
+              </div>
+
+              {error && (
+                <div className="error-alert" role="alert">
+                  <span className="error-icon">⚠️</span>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSendOtp} noValidate className="signup-form">
+                <div className="input-group">
+                  <label htmlFor="name">Full Name</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">👤</span>
+                    <input
+                      id="name"
+                      type="text"
+                      name="name"
+                      placeholder="John Doe"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
     <div className="signup-page">
       {isLoading && <Loader />}
       
@@ -126,76 +193,17 @@ const Signup = () => {
             )}
 
             <form onSubmit={handleSubmit} noValidate className="signup-form">
-              <div className="input-group">
-                <label htmlFor="name">Full Name</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">👤</span>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    placeholder="John Doe"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                  />
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      minLength={6}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="input-group">
-                <label htmlFor="email">Email Address</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">✉️</span>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="password">Password</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    placeholder="Minimum 6 characters"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    minLength={6}
-                  />
-                </div>
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="confirmPassword">Confirm Password</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">🔐</span>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Re-enter your password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    minLength={6}
-                  />
-                </div>
-              </div>
-
+                <button type="submit" className="signup-btn" disabled={isLoading}>
+                  {isLoading ? (
               <button type="submit" className="signup-btn" disabled={isLoading}>
                 {isLoading ? (
                   <span className="btn-loading">
@@ -216,6 +224,4 @@ const Signup = () => {
       </div>
     </div>
   );
-};
-
 export default Signup;

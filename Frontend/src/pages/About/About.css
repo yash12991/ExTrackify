@@ -98,15 +98,15 @@
 }
 
 :root {
-  --primary: #ff6b00;
-  --primary-light: #ff8533;
-  --dark: #1a1a1a;
-  --darker: #0f0f0f;
-  --glow: rgba(255, 107, 0, 0.3);
+  --primary: #00d2ff;
+  --primary-light: #3a7bd5;
+  --dark: #203a43;
+  --darker: #0f2027;
+  --glow: rgba(0, 210, 255, 0.3);
 }
 
 .about-container {
-  background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+  background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #2c5364 100%);
   color: #fff;
   overflow: hidden;
   padding-top: 80px; /* Add padding for navbar */

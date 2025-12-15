@@ -1,29 +1,29 @@
 import toast from "react-hot-toast";
 import { axiosInstance } from "./axios.js";
 
-// Add OTP functions
-export const sendOtp = async (email) => {
-  try {
-    const response = await axiosInstance.post("/otp/send", { email });
-    return response.data;
-  } catch (error) {
-    console.error("Send OTP API error:", error);
-    const errorMessage = error.response?.data?.message || "Failed to send OTP";
-    throw new Error(errorMessage);
-  }
-};
+// OTP functions disabled - email service not available
+// export const sendOtp = async (email) => {
+//   try {
+//     const response = await axiosInstance.post("/otp/send", { email });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Send OTP API error:", error);
+//     const errorMessage = error.response?.data?.message || "Failed to send OTP";
+//     throw new Error(errorMessage);
+//   }
+// };
 
-export const verifyOtp = async (email, otp) => {
-  try {
-    const response = await axiosInstance.post("/otp/verify", { email, otp });
-    return response.data;
-  } catch (error) {
-    console.error("Verify OTP API error:", error);
-    const errorMessage =
-      error.response?.data?.message || "Failed to verify OTP";
-    throw new Error(errorMessage);
-  }
-};
+// export const verifyOtp = async (email, otp) => {
+//   try {
+//     const response = await axiosInstance.post("/otp/verify", { email, otp });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Verify OTP API error:", error);
+//     const errorMessage =
+//       error.response?.data?.message || "Failed to verify OTP";
+//     throw new Error(errorMessage);
+//   }
+// };
 
 export const register = async (signupData) => {
   const response = await axiosInstance.post("/users/register", signupData);
@@ -47,6 +47,9 @@ export const logout = async () => {
   try {
     const response = await axiosInstance.post("/users/logout");
     axiosInstance.defaults.headers.common["Authorization"] = "";
+    // Clear localStorage token (if it was used as fallback)
+    localStorage.removeItem("accessToken");
+    console.log("🧹 Cleared localStorage token");
     return response.data;
   } catch (error) {
     console.error("Logout error:", error);

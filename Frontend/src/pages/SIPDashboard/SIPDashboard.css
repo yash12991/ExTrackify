@@ -1,4 +1,4 @@
-/* Clean SIP Dashboard - Black & Orange Theme */
+/* Clean SIP Dashboard - Modern Teal-Blue Theme */
 * {
   margin: 0;
   padding: 0;
@@ -7,7 +7,7 @@
 
 .sip-dashboard {
   min-height: 100vh;
-  background: #000;
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
   color: #fff;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -21,24 +21,27 @@
   align-items: center;
   margin-bottom: 30px;
   padding: 20px 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid rgba(0, 210, 255, 0.2);
 }
 
 .header-content h1 {
-  color: #ff6b35;
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: 2.5rem;
   font-weight: bold;
   margin: 0;
 }
 
 .header-content p {
-  color: #888;
+  color: #94a3b8;
   margin-top: 5px;
 }
 
 .create-btn {
-  background: #ff6b35;
-  color: #000;
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+  color: white;
   border: none;
   padding: 12px 24px;
   border-radius: 8px;
@@ -48,11 +51,13 @@
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
 }
 
 .create-btn:hover {
-  background: #ff8c5a;
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.4);
 }
 
 /* Loading */
@@ -62,15 +67,15 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #000;
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
   color: #fff;
 }
 
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #333;
-  border-top: 4px solid #ff6b35;
+  border: 4px solid rgba(0, 210, 255, 0.2);
+  border-top: 4px solid #00d2ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;

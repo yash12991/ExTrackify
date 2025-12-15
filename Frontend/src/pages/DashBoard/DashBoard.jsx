@@ -17,6 +17,7 @@ import {
   FaCheckCircle,
   FaTrash,
   FaClock,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import AddExpense from "../../components/expense/AddExpense";
 import EditExpense from "../../components/expense/EditExpense";
@@ -35,6 +36,7 @@ import {
   updateGoal,
   deleteGoal,
   markGoalComplete,
+  getAuthUser,
 } from "../../lib/api.js";
 import Loader from "../../components/Loading/Loading";
 import { debounce } from "lodash";
@@ -46,7 +48,7 @@ const DashBoard = () => {
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [userName, setUserName] = useState("Yash"); // TODO: This should come from your auth context
+  const [userName, setUserName] = useState("");
 
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +158,24 @@ const DashBoard = () => {
       setOverallbudget(res);
     };
     handleOverallBudget();
+
+    const fetchUserData = async () => {
+      try {
+        const userData = await getAuthUser();
+        if (userData && userData.data) {
+          // Extract username: use fullname first, then username, then email part
+          const displayName = userData.data.fullname || 
+                             userData.data.username || 
+                             (userData.data.email ? userData.data.email.split('@')[0] : "User");
+          setUserName(displayName);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        setUserName("User"); // Fallback if fetch fails
+      }
+    };
+    fetchUserData();
+
     return () => {
       isMounted = false;
     };
@@ -457,6 +477,8 @@ const DashBoard = () => {
           }>
             <img src="image.png" className="logo" onClick={()=>navigate("/")} style={{ height: "60px" }} 
  alt="" />
+
+ 
             <h1>Hi {userName} – track your expense</h1>
           </div>
           <button className="logout-btn" onClick={handleLogout}>
@@ -1148,8 +1170,16 @@ const DashBoard = () => {
       {showGoalForm && (
         <div className="modal-overlay">
           <div className="modal-content goal-modal">
-            <div className="modal-header">
-              <h3>Create New Savings Goal</h3>
+            <div className="goal-modal-header">
+              <div className="goal-header-content">
+                <div className="goal-icon-wrapper">
+                  <FaBullseye className="goal-icon" />
+                </div>
+                <div>
+                  <h3>Create New Savings Goal</h3>
+                  <p className="goal-subtitle">Set your target and watch your savings grow</p>
+                </div>
+              </div>
               <button
                 className="close-btn"
                 onClick={() => {
@@ -1169,68 +1199,94 @@ const DashBoard = () => {
             </div>
 
             <div className="goal-form">
-              <div className="form-group">
-                <label>Goal Title</label>
-                <input
-                  type="text"
-                  value={goalFormData.title}
-                  onChange={(e) =>
-                    setGoalFormData({ ...goalFormData, title: e.target.value })
-                  }
-                  placeholder="e.g., Buy Laptop"
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Target Amount (₹)</label>
+              <div className="form-group full-width">
+                <label>
+                  <FaPiggyBank className="label-icon" />
+                  Goal Title
+                </label>
+                <div className="input-with-icon">
                   <input
-                    type="number"
-                    value={goalFormData.targetAmount}
+                    type="text"
+                    value={goalFormData.title}
                     onChange={(e) =>
-                      setGoalFormData({
-                        ...goalFormData,
-                        targetAmount: e.target.value,
-                      })
+                      setGoalFormData({ ...goalFormData, title: e.target.value })
                     }
-                    placeholder="50000"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Current Saved (₹)</label>
-                  <input
-                    type="number"
-                    value={goalFormData.currentSaved}
-                    onChange={(e) =>
-                      setGoalFormData({
-                        ...goalFormData,
-                        currentSaved: e.target.value,
-                      })
-                    }
-                    placeholder="5000"
+                    placeholder="e.g., Buy Laptop, Vacation Fund"
                   />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Saving Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={goalFormData.dailySavingRate}
-                    onChange={(e) =>
-                      setGoalFormData({
-                        ...goalFormData,
-                        dailySavingRate: e.target.value,
-                      })
-                    }
-                    placeholder="500"
-                  />
+                  <label>
+                    <FaBullseye className="label-icon" />
+                    Target Amount
+                  </label>
+                  <div className="input-with-icon">
+                    <FaRupeeSign className="input-icon" />
+                    <input
+                      type="number"
+                      value={goalFormData.targetAmount}
+                      onChange={(e) =>
+                        setGoalFormData({
+                          ...goalFormData,
+                          targetAmount: e.target.value,
+                        })
+                      }
+                      placeholder="50000"
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Frequency</label>
+                  <label>
+                    <FaWallet className="label-icon" />
+                    Current Saved
+                  </label>
+                  <div className="input-with-icon">
+                    <FaRupeeSign className="input-icon" />
+                    <input
+                      type="number"
+                      value={goalFormData.currentSaved}
+                      onChange={(e) =>
+                        setGoalFormData({
+                          ...goalFormData,
+                          currentSaved: e.target.value,
+                        })
+                      }
+                      placeholder="5000"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    <FaChartLine className="label-icon" />
+                    Saving Rate
+                  </label>
+                  <div className="input-with-icon">
+                    <FaRupeeSign className="input-icon" />
+                    <input
+                      type="number"
+                      value={goalFormData.dailySavingRate}
+                      onChange={(e) =>
+                        setGoalFormData({
+                          ...goalFormData,
+                          dailySavingRate: e.target.value,
+                        })
+                      }
+                      placeholder="500"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    <FaClock className="label-icon" />
+                    Frequency
+                  </label>
                   <select
                     value={goalFormData.frequency}
                     onChange={(e) =>
@@ -1247,27 +1303,44 @@ const DashBoard = () => {
               </div>
 
               <button
-                className="btn-secondary estimate-btn"
+                className="estimate-btn"
                 onClick={handleEstimateGoal}
                 disabled={
                   !goalFormData.targetAmount || !goalFormData.dailySavingRate
                 }
               >
-                Estimate Time
+                <FaClock />
+                Calculate Timeline
               </button>
 
               {goalEstimate && (
                 <div className="estimate-result">
-                  <h4>📆 Estimation Result</h4>
-                  <p>
-                    <strong>Days Needed:</strong> {goalEstimate.daysNeeded} days
-                  </p>
-                  <p>
-                    <strong>Expected Date:</strong>{" "}
-                    {new Date(
-                      goalEstimate.estimatedCompletionDate
-                    ).toLocaleDateString()}
-                  </p>
+                  <div className="estimate-header">
+                    <FaCheckCircle className="estimate-icon" />
+                    <h4>Timeline Calculated</h4>
+                  </div>
+                  <div className="estimate-details">
+                    <div className="estimate-item">
+                      <div className="estimate-label">
+                        <FaClock /> Days Needed
+                      </div>
+                      <div className="estimate-value">{goalEstimate.daysNeeded} days</div>
+                    </div>
+                    <div className="estimate-item">
+                      <div className="estimate-label">
+                        <FaCalendarAlt /> Expected Date
+                      </div>
+                      <div className="estimate-value">
+                        {new Date(
+                          goalEstimate.estimatedCompletionDate
+                        ).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1290,7 +1363,8 @@ const DashBoard = () => {
                     !goalFormData.dailySavingRate
                   }
                 >
-                  Save Goal
+                  <FaCheckCircle />
+                  Create Goal
                 </button>
               </div>
             </div>
