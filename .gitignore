@@ -42,6 +42,11 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
