@@ -18,11 +18,11 @@ const Navbar = () => {
     setIsLoggingOut(true);
     try {
       await logout();
-      queryClient.clear();
-      queryClient.invalidateQueries(["authUser"]);
+      queryClient.setQueryData(["auth"], null);
       navigate("/");
     } catch (error) {
-      console.error("Logout failed:", error);
+      queryClient.setQueryData(["auth"], null);
+      navigate("/");
     } finally {
       setIsLoggingOut(false);
     }

@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import {
   FaTimes,
   FaRupeeSign,
   FaCalendarAlt,
-  FaCreditCard,
+  FaTag,
   FaStickyNote,
   FaExclamationTriangle,
+  FaReceipt,
+  FaWallet,
+  FaRedoAlt,
 } from "react-icons/fa";
 import "./ExpenseForm.css";
 import { addExpense } from "../../lib/api";
@@ -22,6 +25,7 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
       modeofpayment: "",
       tags: [],
       recurring: false,
+      frequency: "monthly",
     }
   );
 
@@ -29,31 +33,33 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
   const [errors, setErrors] = useState({});
 
   const categories = [
-    "food",
-    "transport",
-    "housing",
-    "utilities",
-    "healthcare",
-    "entertainment",
-    "shopping",
-    "other",
+    { value: "food", label: "Food & Dining", icon: "🍔" },
+    { value: "transport", label: "Transport", icon: "🚗" },
+    { value: "housing", label: "Housing", icon: "🏠" },
+    { value: "utilities", label: "Utilities", icon: "💡" },
+    { value: "healthcare", label: "Healthcare", icon: "🏥" },
+    { value: "entertainment", label: "Entertainment", icon: "🎬" },
+    { value: "shopping", label: "Shopping", icon: "🛍️" },
+    { value: "other", label: "Other", icon: "📦" },
   ];
 
   const paymentModes = [
-    { value: "upi", label: "UPI" },
-    { value: "credit card", label: "Credit Card" },
-    { value: "debit card", label: "Debit Card" },
-    { value: "cash", label: "Cash" },
-    { value: "netbanking", label: "Net Banking" },
-    { value: "cheque", label: "Cheque" },
-    { value: "other", label: "Other" },
+    { value: "upi", label: "UPI", icon: "📱" },
+    { value: "credit card", label: "Credit Card", icon: "💳" },
+    { value: "debit card", label: "Debit Card", icon: "💳" },
+    { value: "cash", label: "Cash", icon: "💵" },
+    { value: "netbanking", label: "Net Banking", icon: "🏦" },
+    { value: "cheque", label: "Cheque", icon: "📝" },
+    { value: "other", label: "Other", icon: "💰" },
   ];
+
+  const quickAmounts = [100, 500, 1000, 2000, 5000];
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.amount || Number(formData.amount) <= 0) {
-      newErrors.amount = "Please enter a valid amount greater than 0";
+      newErrors.amount = "Please enter a valid amount";
     }
 
     if (!formData.category.trim()) {
@@ -69,7 +75,7 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
     } else {
       const selectedDate = new Date(formData.date);
       const today = new Date();
-      today.setHours(23, 59, 59, 999); // End of today
+      today.setHours(23, 59, 59, 999);
 
       if (selectedDate > today) {
         newErrors.date = "Date cannot be in the future";
@@ -128,6 +134,17 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
     handleInputChange("tags", tags);
   };
 
+  const handleQuickAmount = (amount) => {
+    handleInputChange("amount", amount.toString());
+  };
+
+  useEffect(() => {
+    document.body.classList.add("expense-modal-open");
+    return () => {
+      document.body.classList.remove("expense-modal-open");
+    };
+  }, []);
+
   return (
     <motion.div
       className="expense-form-modal"
@@ -141,66 +158,87 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
       <motion.form
         onSubmit={handleSubmit}
         className="expense-form"
-        initial={{ scale: 0.9, y: 20 }}
+        initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
         <div className="form-header">
-          <h2>{expense ? "Edit Expense" : "Add New Expense"}</h2>
+          <div className="form-header-content">
+            <div className="form-icon-wrapper">
+              <FaReceipt />
+            </div>
+            <div>
+              <h2>{expense ? "Edit Expense" : "Add Expense"}</h2>
+              <p className="subtitle">
+                {expense ? "Update your expense details" : "Track your spending"}
+              </p>
+            </div>
+          </div>
           <button type="button" className="close-btn" onClick={onClose}>
             <FaTimes />
           </button>
         </div>
 
-        <p className="subtitle">
-          {expense
-            ? "Update your expense details"
-            : "Track your spending easily"}
-        </p>
-
         <div className="form-content">
-          <div className="form-row">
-            <div
-              className={`form-group has-icon ${errors.amount ? "error" : ""}`}
-            >
-              <label>
-                Amount <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaRupeeSign className="input-icon" />
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={(e) => handleInputChange("amount", e.target.value)}
-                  placeholder="0.00"
-                />
-              </div>
-              {errors.amount && (
-                <div className="validation-error">
-                  <FaExclamationTriangle />
-                  {errors.amount}
-                </div>
-              )}
+          {/* Amount Field */}
+          <div className={`form-group ${errors.amount ? "error" : ""}`}>
+            <label>
+              <FaRupeeSign className="label-icon" />
+              Amount <span className="required">*</span>
+            </label>
+            <div className="input-wrapper">
+              <FaRupeeSign className="input-icon" />
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => handleInputChange("amount", e.target.value)}
+                placeholder="0.00"
+              />
             </div>
+            {errors.amount && (
+              <div className="validation-error">
+                <FaExclamationTriangle />
+                {errors.amount}
+              </div>
+            )}
+            <div className="quick-amounts">
+              {quickAmounts.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  className="quick-amount-btn"
+                  onClick={() => handleQuickAmount(amount)}
+                >
+                  ₹{amount}
+                </button>
+              ))}
+            </div>
+          </div>
 
+          <div className="form-row">
+            {/* Category Field */}
             <div className={`form-group ${errors.category ? "error" : ""}`}>
               <label>
+                <FaTag className="label-icon" />
                 Category <span className="required">*</span>
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
-                className="form-select"
-              >
-                <option value="">Select Category</option>
+              <div className="category-grid">
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </option>
+                  <button
+                    key={cat.value}
+                    type="button"
+                    className={`category-btn ${
+                      formData.category === cat.value ? "selected" : ""
+                    }`}
+                    onClick={() => handleInputChange("category", cat.value)}
+                  >
+                    <span className="category-icon">{cat.icon}</span>
+                    <span className="category-label">{cat.label}</span>
+                  </button>
                 ))}
-              </select>
+              </div>
               {errors.category && (
                 <div className="validation-error">
                   <FaExclamationTriangle />
@@ -211,10 +249,10 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
           </div>
 
           <div className="form-row">
-            <div
-              className={`form-group ${errors.modeofpayment ? "error" : ""}`}
-            >
+            {/* Payment Mode Field */}
+            <div className={`form-group ${errors.modeofpayment ? "error" : ""}`}>
               <label>
+                <FaWallet className="label-icon" />
                 Payment Mode <span className="required">*</span>
               </label>
               <select
@@ -224,10 +262,10 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
                 }
                 className="form-select"
               >
-                <option value="">Select Payment Mode</option>
+                <option value="">Select Mode</option>
                 {paymentModes.map((mode) => (
                   <option key={mode.value} value={mode.value}>
-                    {mode.label}
+                    {mode.icon} {mode.label}
                   </option>
                 ))}
               </select>
@@ -239,10 +277,10 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
               )}
             </div>
 
-            <div
-              className={`form-group has-icon ${errors.date ? "error" : ""}`}
-            >
+            {/* Date Field */}
+            <div className={`form-group ${errors.date ? "error" : ""}`}>
               <label>
+                <FaCalendarAlt className="label-icon" />
                 Date <span className="required">*</span>
               </label>
               <div className="input-wrapper">
@@ -263,23 +301,27 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
             </div>
           </div>
 
+          {/* Tags Field */}
           <div className="form-group">
-            <label>Tags</label>
+            <label>
+              <FaTag className="label-icon" />
+              Tags
+            </label>
             <div className="input-wrapper">
+              <FaTag className="input-icon" />
               <input
                 type="text"
                 value={formData.tags.join(", ")}
                 onChange={handleTagsChange}
-                placeholder="lunch, friends, work (comma separated)"
+                placeholder="lunch, work, friends..."
                 className="tags-input"
               />
             </div>
-            <small className="form-hint">
-              Separate multiple tags with commas
-            </small>
+            <small className="form-hint">Separate with commas</small>
           </div>
 
-          <div className="form-group checkbox-group">
+          {/* Recurring Checkbox */}
+          <div className="checkbox-group">
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -288,19 +330,37 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
                   handleInputChange("recurring", e.target.checked)
                 }
               />
-              <span className="checkmark"></span>
-              Recurring Expense
+              <span className="checkmark">
+                  <FaRedoAlt />
+              </span>
+              <span>Recurring expense</span>
             </label>
+            {formData.recurring && (
+              <select
+                value={formData.frequency || "monthly"}
+                onChange={(e) => handleInputChange("frequency", e.target.value)}
+                className="form-select frequency-select"
+                style={{ marginLeft: "36px", marginTop: "8px" }}
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            )}
           </div>
 
-          <div className="form-group has-icon">
-            <label>Description</label>
+          {/* Notes Field */}
+          <div className="form-group">
+            <label>
+              <FaStickyNote className="label-icon" />
+              Description
+            </label>
             <div className="input-wrapper">
-              <FaStickyNote className="input-icon" />
+              <FaStickyNote className="input-icon textarea-icon" />
               <textarea
                 value={formData.notes}
                 onChange={(e) => handleInputChange("notes", e.target.value)}
-                placeholder="Add a note about this expense (optional)"
+                placeholder="Add notes about this expense..."
                 rows="3"
               />
             </div>
@@ -318,7 +378,9 @@ const AddExpense = ({ onSubmit, onClose, expense = null }) => {
                 {expense ? "Updating..." : "Adding..."}
               </>
             ) : (
-              <>{expense ? "Update" : "Add"} Expense</>
+              <>
+                {expense ? "Update Expense" : "Add Expense"}
+              </>
             )}
           </button>
         </div>

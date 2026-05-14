@@ -3,7 +3,7 @@ import { Router } from "express";
 const router = Router();
 
 // Health check endpoint to verify environment variables
-router.get("/health", (req, res) => {
+router.get("/", (req, res) => {
   const envVars = {
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,

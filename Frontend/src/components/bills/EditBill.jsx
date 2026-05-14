@@ -52,7 +52,7 @@ const EditBill = ({ bill, onClose, onSuccess }) => {
     { value: "weekly", label: "Weekly" },
     { value: "monthly", label: "Monthly" },
     { value: "3months", label: "Every 3 Months" },
-    { value: "quaterly", label: "Quarterly" },
+    { value: "quarterly", label: "Quarterly" },
     { value: "6months", label: "Every 6 Months" },
     { value: "yearly", label: "Yearly" },
   ];

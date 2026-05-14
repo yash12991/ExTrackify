@@ -5,10 +5,8 @@ import {
   FaChartPie,
   FaSignOutAlt,
   FaPlus,
-  FaFileInvoiceDollar,
   FaPiggyBank,
   FaChartLine,
-  FaQuestionCircle,
   FaEllipsisV,
   FaEdit,
   FaTimes,
@@ -18,6 +16,8 @@ import {
   FaTrash,
   FaClock,
   FaCalendarAlt,
+  FaArrowUp,
+  FaArrowDown,
 } from "react-icons/fa";
 import AddExpense from "../../components/expense/AddExpense";
 import EditExpense from "../../components/expense/EditExpense";
@@ -37,12 +37,24 @@ import {
   deleteGoal,
   markGoalComplete,
   getAuthUser,
+  getCategoryWiseSummary,
 } from "../../lib/api.js";
+import { Doughnut } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 import Loader from "../../components/Loading/Loading";
 import { debounce } from "lodash";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 
 const DashBoard = () => {
   const navigate = useNavigate();
@@ -52,8 +64,6 @@ const DashBoard = () => {
 
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
   const [error, setError] = useState(null);
   const [OverallBudget, setOverallbudget] = useState(0);
   const [showBudgetMenu, setShowBudgetMenu] = useState(false);
@@ -76,6 +86,9 @@ const DashBoard = () => {
   const [showEditExpense, setShowEditExpense] = useState(false);
   const [expenseToEdit, setExpenseToEdit] = useState(null);
   const [editingExpenseId, setEditingExpenseId] = useState(null);
+
+  // Category chart state
+  const [categoryData, setCategoryData] = useState(null);
 
   // Goals state
   const [goals, setGoals] = useState([]);
@@ -119,16 +132,21 @@ const DashBoard = () => {
     return { totalExpense, remaining };
   }, [expenses, OverallBudget]);
 
+  const budgetUtilization = useMemo(() => {
+    if (!OverallBudget || OverallBudget <= 0) return 0;
+    return Math.min(100, Math.round((totals.totalExpense / OverallBudget) * 100));
+  }, [totals.totalExpense, OverallBudget]);
+
   useEffect(() => {
     let isMounted = true;
 
     async function fetchExpense() {
-      setLoading(true);
+      if (expenses.length === 0) setLoading(true);
       setError(null);
       try {
         const res = await getExpenses(
-          page,
-          10,
+          1,
+          9999,
           sortBy,
           sortOrder,
           filters.category,
@@ -137,12 +155,12 @@ const DashBoard = () => {
           filters.minAmount,
           filters.maxAmount
         );
+
         if (!res || !res.data) {
           throw new Error("Network error: Failed to fetch expenses");
         }
 
         setExpenses(res.data);
-        setTotalPages(res.pagination.pages);
       } catch (error) {
         setError(error.message || "An unknown error occurred");
         console.error("Failed to fetch expenses:", error);
@@ -176,22 +194,22 @@ const DashBoard = () => {
     };
     fetchUserData();
 
+    const fetchCategoryData = async () => {
+      try {
+        const res = await getCategoryWiseSummary();
+        if (res?.labels && res?.data) {
+          setCategoryData(res.labels.map((label, i) => ({ _id: label, total: res.data[i] })));
+        }
+      } catch (err) {
+        console.error("Failed to fetch category data:", err);
+      }
+    };
+    fetchCategoryData();
+
     return () => {
       isMounted = false;
     };
-  }, [page, filters, sortBy, sortOrder]);
-
-  const handlePageChange = useCallback(
-    (direction) => {
-      setLoading(true);
-      if (direction === "next" && page < totalPages) {
-        setPage((prev) => prev + 1);
-      } else if (direction === "prev" && page > 1) {
-        setPage((prev) => prev - 1);
-      }
-    },
-    [page, totalPages]
-  );
+  }, [filters, sortBy, sortOrder]);
   const [isloggedout, setIsLoggedout] = useState(false);
 
   const handleBudgetUpdate = async () => {
@@ -220,15 +238,16 @@ const DashBoard = () => {
     }
   };
 
+  const queryClient2 = useQueryClient();
+
   const handleLogout = async () => {
     try {
-      const res = await logout();
-      setIsLoggedout(true);
+      await logout();
+      queryClient2.setQueryData(["auth"], null);
       navigate("/");
     } catch (error) {
-      console.error("Logout failed:", error);
-      // alert("Failed to logout. Please try again.");
-      toast.error("Failed to logout. Please try again.");
+      queryClient2.setQueryData(["auth"], null);
+      navigate("/");
     }
   };
 
@@ -248,6 +267,19 @@ const DashBoard = () => {
     },
     [filters, debouncedUpdateFilters]
   );
+
+  const handleResetFilters = useCallback(() => {
+    setFilters({
+      category: "",
+      startDate: "",
+      endDate: "",
+      minAmount: "",
+      maxAmount: "",
+    });
+    setSortBy("date");
+    setSortOrder("desc");
+    setPage(1);
+  }, []);
 
   // Add expense refresh function
   const refreshExpenses = useCallback(() => {
@@ -443,49 +475,19 @@ const DashBoard = () => {
   }, [fetchGoals]);
 
   return (
-    <div className="dashboard-layout">
-      {/* Left Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h2>Tools</h2>
-        </div>
-        <nav className="sidebar-nav">
-          <button className="nav-item active">
-            <FaWallet /> All Expenses
-          </button>
-          <button className="nav-item" onClick={() => navigate("/bills")}>
-            <FaFileInvoiceDollar /> Bills & Subscriptions
-          </button>
-          <button
-            className="nav-item"
-            onClick={() => navigate("/sip-dashboard")}
-          >
-            <FaPiggyBank /> SIP Details
-          </button>
-          <button className="nav-item">
-            <FaQuestionCircle /> Help
-          </button>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="dashboard-container">
-        {/* Top Section */}
+    <DashboardLayout>
+      <div className="dashboard-content-wrapper">
         <header className="dashboard-header">
-          <div style={
-            {display:"flex"}
-          }>
-            <img src="image.png" className="logo" onClick={()=>navigate("/")} style={{ height: "60px" }} 
- alt="" />
-
- 
-            <h1>Hi {userName} – track your expense</h1>
+          <div className="header-copy">
+            <p className="eyebrow">Expense Overview</p>
+            <h1>Hi {userName}, here is your financial snapshot</h1>
           </div>
           <button className="logout-btn" onClick={handleLogout}>
-            <FaSignOutAlt /> Logout
+            <FaSignOutAlt /> Sign out
           </button>
         </header>
 
+        <div className="dashboard-content-scroll">
         {/* Stats Cards */}
         <div className="stats-container">
           <motion.div className="stat-card" whileHover={{ scale: 1.02 }}>
@@ -521,6 +523,7 @@ const DashBoard = () => {
             </div>
             <div className="stat-value">₹{OverallBudget}</div>
             <div className="stat-label">Monthly Budget</div>
+            <div className="budget-utilization">Used {budgetUtilization}%</div>
           </motion.div>
 
           <motion.div className="stat-card" whileHover={{ scale: 1.02 }}>
@@ -863,95 +866,45 @@ const DashBoard = () => {
             <div className="chart-card">
               <h3>Expense Breakdown</h3>
               <div className="chart-wrapper">
-                {/* Add your pie chart component here */}
-                <div className="placeholder-chart">Pie Chart</div>
+                {categoryData && categoryData.length > 0 ? (
+                  <Doughnut
+                    data={{
+                      labels: categoryData.map((c) => c._id),
+                      datasets: [{
+                        data: categoryData.map((c) => c.total),
+                        backgroundColor: [
+                          "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0",
+                          "#9966FF", "#FF9F40", "#C9CBCF", "#7BC8A4",
+                        ],
+                        borderWidth: 0,
+                      }],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: true,
+                      cutout: "65%",
+                      plugins: {
+                        legend: {
+                          position: "bottom",
+                          labels: {
+                            padding: 12,
+                            usePointStyle: true,
+                            pointStyle: "circle",
+                            font: { size: 11 },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="placeholder-chart">No expense data</div>
+                )}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Filters Section */}
-        <section className="filters-section">
-          <div className="filters-grid">
-            <div className="filter-group">
-              <label>Category</label>
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-              >
-                {categoryOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
 
-            <div className="filter-group">
-              <label>Date Range</label>
-              <div className="date-inputs">
-                <input
-                  type="date"
-                  value={filters.startDate}
-                  onChange={(e) =>
-                    handleFilterChange("startDate", e.target.value)
-                  }
-                  placeholder="Start Date"
-                />
-                <input
-                  type="date"
-                  value={filters.endDate}
-                  onChange={(e) =>
-                    handleFilterChange("endDate", e.target.value)
-                  }
-                  placeholder="End Date"
-                />
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <label>Amount Range</label>
-              <div className="amount-inputs">
-                <input
-                  type="number"
-                  value={filters.minAmount}
-                  onChange={(e) =>
-                    handleFilterChange("minAmount", e.target.value)
-                  }
-                  placeholder="Min Amount"
-                />
-                <input
-                  type="number"
-                  value={filters.maxAmount}
-                  onChange={(e) =>
-                    handleFilterChange("maxAmount", e.target.value)
-                  }
-                  placeholder="Max Amount"
-                />
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <label>Sort By</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="date">Date</option>
-                <option value="time">Time Created</option>
-                <option value="amount">Amount</option>
-                <option value="category">Category</option>
-              </select>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-              >
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
-              </select>
-            </div>
-          </div>
-        </section>
 
         {/* Recent Activity - Add better error handling */}
         <section className="recent-activity">
@@ -978,6 +931,67 @@ const DashBoard = () => {
             </div>
           ) : (
             <div className="table-container">
+              <div className="table-filters-bar">
+                <div className="tf-left">
+                  <div className="tf-categories">
+                    {categoryOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={`tf-chip ${filters.category === option.value ? "active" : ""}`}
+                        onClick={() => handleFilterChange("category", filters.category === option.value ? "" : option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="tf-right">
+                  <div className="tf-group">
+                    <input
+                      type="date"
+                      value={filters.startDate}
+                      onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                      title="Start Date"
+                    />
+                    <span>—</span>
+                    <input
+                      type="date"
+                      value={filters.endDate}
+                      onChange={(e) => handleFilterChange("endDate", e.target.value)}
+                      title="End Date"
+                    />
+                  </div>
+                  <div className="tf-group">
+                    <input
+                      type="number"
+                      value={filters.minAmount}
+                      onChange={(e) => handleFilterChange("minAmount", e.target.value)}
+                      placeholder="Min ₹"
+                    />
+                    <span>—</span>
+                    <input
+                      type="number"
+                      value={filters.maxAmount}
+                      onChange={(e) => handleFilterChange("maxAmount", e.target.value)}
+                      placeholder="Max ₹"
+                    />
+                  </div>
+                  <div className="tf-group">
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                      <option value="date">Date</option>
+                      <option value="amount">Amount</option>
+                      <option value="category">Category</option>
+                    </select>
+                    <button type="button" className="tf-sort-order" onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}>
+                      {sortOrder === "desc" ? <FaArrowDown /> : <FaArrowUp />}
+                    </button>
+                  </div>
+                  {(filters.category || filters.startDate || filters.endDate || filters.minAmount || filters.maxAmount || sortBy !== "date" || sortOrder !== "desc") && (
+                    <button type="button" className="tf-clear" onClick={handleResetFilters}>Reset</button>
+                  )}
+                </div>
+              </div>
               <table>
                 <thead>
                   <tr>
@@ -1008,26 +1022,27 @@ const DashBoard = () => {
                         <td>{expense.modeofpayment}</td>
                         <td>{expense.notes || "No notes"}</td>
                         <td>
-                          <button
-                            className="action-btn edit"
-                            onClick={() => handleEditExpense(expense._id)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="action-btn delete"
-                            onClick={() => handleDeleteExpense(expense._id)}
-                            disabled={deletingExpenseId === expense._id}
-                          >
-                            {deletingExpenseId === expense._id ? (
-                              <>
+                          <div className="table-actions">
+                            <button
+                              className="table-action-btn edit"
+                              onClick={() => handleEditExpense(expense._id)}
+                              title="Edit expense"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              className="table-action-btn delete"
+                              onClick={() => handleDeleteExpense(expense._id)}
+                              disabled={deletingExpenseId === expense._id}
+                              title="Delete expense"
+                            >
+                              {deletingExpenseId === expense._id ? (
                                 <div className="loading-spinner" />
-                                Deleting...
-                              </>
-                            ) : (
-                              "Delete"
-                            )}
-                          </button>
+                              ) : (
+                                <FaTrash />
+                              )}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1047,30 +1062,10 @@ const DashBoard = () => {
                   Error loading expenses: {error}
                 </div>
               )}
-              <div className="pagination-controls">
-                <button
-                  onClick={() => handlePageChange("prev")}
-                  className="btn pagination-btn"
-                  disabled={page === 1 || loading}
-                >
-                  Previous
-                </button>
-                <span className="pagination-info">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  onClick={() => handlePageChange("next")}
-                  className="btn pagination-btn"
-                  disabled={page === totalPages || loading}
-                >
-                  Next
-                </button>
-              </div>
+
             </div>
           )}
         </section>
-      </main>
-
       {/* Add Expense Modal */}
       {showAddExpense && (
         <AddExpense
@@ -1098,8 +1093,8 @@ const DashBoard = () => {
 
       {/* Edit Budget Modal */}
       {showEditBudget && (
-        <div className="budget-modal">
-          <div className="budget-modal-content">
+        <div className="modal-overlay">
+          <div className="modal-content">
             <button
               className="budget-close-btn"
               onClick={() => {
@@ -1376,8 +1371,16 @@ const DashBoard = () => {
       {editingGoal && (
         <div className="modal-overlay">
           <div className="modal-content goal-modal">
-            <div className="modal-header">
-              <h3>Edit Goal</h3>
+            <div className="goal-modal-header">
+              <div className="goal-header-content">
+                <div className="goal-icon-wrapper">
+                  <FaEdit className="goal-icon" />
+                </div>
+                <div>
+                  <h3>Edit Savings Goal</h3>
+                  <p className="goal-subtitle">Update your progress for "{editingGoal.title}"</p>
+                </div>
+              </div>
               <button
                 className="close-btn"
                 onClick={() => setEditingGoal(null)}
@@ -1387,32 +1390,48 @@ const DashBoard = () => {
             </div>
 
             <div className="goal-form">
-              <div className="form-group">
-                <label>Current Saved (₹)</label>
-                <input
-                  type="number"
-                  defaultValue={editingGoal.currentSaved}
-                  onChange={(e) =>
-                    setEditingGoal({
-                      ...editingGoal,
-                      currentSaved: Number(e.target.value),
-                    })
-                  }
-                />
-              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    <FaWallet className="label-icon" />
+                    Current Saved
+                  </label>
+                  <div className="input-with-icon">
+                    <FaRupeeSign className="input-icon" />
+                    <input
+                      type="number"
+                      defaultValue={editingGoal.currentSaved}
+                      onChange={(e) =>
+                        setEditingGoal({
+                          ...editingGoal,
+                          currentSaved: Number(e.target.value),
+                        })
+                      }
+                      placeholder="Enter current amount"
+                    />
+                  </div>
+                </div>
 
-              <div className="form-group">
-                <label>Daily Saving Rate (₹)</label>
-                <input
-                  type="number"
-                  defaultValue={editingGoal.dailySavingRate}
-                  onChange={(e) =>
-                    setEditingGoal({
-                      ...editingGoal,
-                      dailySavingRate: Number(e.target.value),
-                    })
-                  }
-                />
+                <div className="form-group">
+                  <label>
+                    <FaChartLine className="label-icon" />
+                    Daily Saving Rate
+                  </label>
+                  <div className="input-with-icon">
+                    <FaRupeeSign className="input-icon" />
+                    <input
+                      type="number"
+                      defaultValue={editingGoal.dailySavingRate}
+                      onChange={(e) =>
+                        setEditingGoal({
+                          ...editingGoal,
+                          dailySavingRate: Number(e.target.value),
+                        })
+                      }
+                      placeholder="Enter daily saving rate"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="form-actions">
@@ -1431,6 +1450,7 @@ const DashBoard = () => {
                     })
                   }
                 >
+                  <FaCheckCircle />
                   Update Goal
                 </button>
               </div>
@@ -1438,7 +1458,9 @@ const DashBoard = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

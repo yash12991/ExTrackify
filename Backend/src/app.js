@@ -70,6 +70,16 @@ import goalRoutes from "./routes/goal.routes.js";
 // import otpRoutes from "./routes/otp.routes.js"; // OTP disabled - email service not available
 import billsRoutes from "./routes/bills.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import botRoutes from "./routes/bot.routes.js";
+import stockRoutes from "./routes/stock.routes.js";
+import mfRoutes from "./routes/mf.routes.js";
+import bankStatementRoutes from "./routes/bankStatement.routes.js";
+import portfolioRoutes from "./routes/portfolio.routes.js";
+import exportRoutes from "./routes/export.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
+import networthRoutes from "./routes/networth.routes.js";
+import alertRoutes from "./routes/alert.routes.js";
+import receiptRoutes from "./routes/receipt.routes.js";
 
 // Health check route (should be first)
 app.use("/api/v1/health", healthRoutes);
@@ -82,13 +92,24 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/goals", goalRoutes);
 // app.use("/api/v1/otp", otpRoutes); // OTP disabled - email service not available
 app.use("/api/v1/bills", billsRoutes);
+app.use("/api/v1/bot", botRoutes);
+app.use("/api/v1/stocks", stockRoutes);
+app.use("/api/v1/mf", mfRoutes);
+app.use("/api/v1/bank-statement", bankStatementRoutes);
+app.use("/api/v1/portfolio", portfolioRoutes);
+app.use("/api/v1/export", exportRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api/v1/networth", networthRoutes);
+app.use("/api/v1/alerts", alertRoutes);
+app.use("/api/v1/receipts", receiptRoutes);
 
 // Add error handling middleware
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
-  res.status(500).json({
+  const status = err.statuscode || err.status || 500;
+  res.status(status).json({
     success: false,
-    message: "Internal server error",
+    message: err.message || "Internal server error",
     error: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });

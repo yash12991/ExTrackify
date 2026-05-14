@@ -1,8 +1,8 @@
 // cron/monthlySummary.js
 import cron from 'node-cron';
-import { User } from '../models/User.models.js';
+import { User } from '../models/Users.models.js';
 import { generateMonthlySummary } from '../utils/sipSummary.js';
-import { sendEmail } from '../utils/emailService.js';
+import { sendEmail } from '../utils/nodemailer.js';
 
 cron.schedule('0 9 1 * *', async () => {
   const users = await User.find();

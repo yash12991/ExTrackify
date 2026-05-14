@@ -28,6 +28,7 @@ import AddBill from "../../components/bills/AddBill";
 import EditBill from "../../components/bills/EditBill";
 import BillDetails from "../../components/bills/BillDetails";
 import Loading from "../../components/Loading/Loading";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 import "./BillsDashboard.css";
 
 const BillsDashboard = () => {
@@ -203,14 +204,19 @@ const BillsDashboard = () => {
   }
 
   return (
+    <DashboardLayout>
     <div className="bills-dashboard">
       <div className="dashboard-header">
-        <div className="header-content">
+        <div className="header-copy">
+          <p className="eyebrow">Bill management</p>
           <h1 className="dashboard-title">
             <FaMoneyBillWave className="title-icon" />
             Bills & Subscriptions
           </h1>
-          <button className="add-bill-btn" onClick={() => setShowAddBill(true)}>
+          <p className="header-subtitle">Track recurring payments, due dates, and payment status in one place.</p>
+        </div>
+        <div className="header-actions">
+          <button type="button" className="add-bill-btn" onClick={() => setShowAddBill(true)}>
             <FaPlus />
             Add Bill
           </button>
@@ -306,7 +312,7 @@ const BillsDashboard = () => {
         </div>
 
         <div className="filter-controls">
-          <button
+          <button type="button"
             className={`filter-toggle ${showFilters ? "active" : ""}`}
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -348,7 +354,7 @@ const BillsDashboard = () => {
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
                 <option value="3months">3 Months</option>
-                <option value="quaterly">Quarterly</option>
+                <option value="quarterly">Quarterly</option>
                 <option value="6months">6 Months</option>
                 <option value="yearly">Yearly</option>
               </select>
@@ -444,14 +450,14 @@ const BillsDashboard = () => {
                   )}
 
                 <div className="bill-actions">
-                  <button
+                  <button type="button"
                     className="action-btn view"
                     onClick={() => handleViewDetails(bill)}
                     title="View Details"
                   >
                     <FaEye />
                   </button>
-                  <button
+                  <button type="button"
                     className="action-btn edit"
                     onClick={() => handleEdit(bill)}
                     title="Edit Bill"
@@ -459,7 +465,7 @@ const BillsDashboard = () => {
                     <FaEdit />
                   </button>
                   {bill.status === "pending" && (
-                    <button
+                    <button type="button"
                       className="action-btn pay"
                       onClick={() => handleMarkAsPaid(bill._id)}
                       title="Mark as Paid"
@@ -467,7 +473,7 @@ const BillsDashboard = () => {
                       <FaCheckCircle />
                     </button>
                   )}
-                  <button
+                  <button type="button"
                     className="action-btn delete"
                     onClick={() => handleDelete(bill._id)}
                     title="Delete Bill"
@@ -483,7 +489,7 @@ const BillsDashboard = () => {
             <FaMoneyBillWave className="empty-icon" />
             <h3>No bills found</h3>
             <p>Start by adding your first bill or adjust your filters</p>
-            <button
+            <button type="button"
               className="add-bill-btn"
               onClick={() => setShowAddBill(true)}
             >
@@ -497,7 +503,7 @@ const BillsDashboard = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="pagination">
-          <button
+          <button type="button"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             className="pagination-btn"
@@ -507,7 +513,7 @@ const BillsDashboard = () => {
           <span className="pagination-info">
             Page {currentPage} of {totalPages}
           </span>
-          <button
+          <button type="button"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
@@ -571,6 +577,7 @@ const BillsDashboard = () => {
         />
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

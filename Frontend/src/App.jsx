@@ -13,10 +13,22 @@ import useAuthUser from "./hooks/useAuthUser";
 import Features from "./pages/Features/Features";
 import About from "./pages/About/About";
 import Signup from "./pages/Signup/Signup";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import DashBoard from "./pages/DashBoard/DashBoard";
 import SIPDashboard from "./pages/SIPDashboard/SIPDashboard";
 import SIPDetails from "./pages/SIPDetails/SIPDetails";
 import BillsDashboard from "./pages/BillsDashboard/BillsDashboard";
+import FinancialBot from "./pages/FinancialBot/FinancialBot";
+import MutualFunds from "./pages/MutualFunds/MutualFunds";
+import Stocks from "./pages/Stocks/Stocks";
+import BankStatement from "./pages/BankStatement/BankStatement";
+import Portfolio from "./pages/Portfolio/Portfolio";
+import NetWorth from "./pages/NetWorth/NetWorth";
+import SpendingAnalytics from "./pages/SpendingAnalytics/SpendingAnalytics";
+import Alerts from "./pages/Alerts/Alerts";
+import ReceiptScanner from "./pages/ReceiptScanner/ReceiptScanner";
+import BudgetManagement from "./pages/BudgetManagement/BudgetManagement";
 import { ErrorToaster } from "./components/errordisplay/ErrorDisplay";
 import Cursor from "./components/cursor/Cursor";
 import Loader from "./components/Loading/Loading";
@@ -27,12 +39,11 @@ const App = () => {
   const { isLoading, authUser, error, isAuthenticated } = useAuthUser();
 
   useEffect(() => {
-    // Redirect from protected routes when not authenticated
-    if (
-      !isLoading &&
-      !isAuthenticated &&
-      (location.pathname === "/dashboard" || location.pathname === "/bills")
-    ) {
+    const protectedPaths = ["/dashboard", "/bills", "/sip-dashboard", "/financial-bot", "/mutual-funds", "/stocks", "/bank-statement", "/portfolio", "/net-worth", "/analytics", "/alerts", "/receipt-scanner", "/budgets"];
+    const isProtected = protectedPaths.some(
+      (p) => location.pathname === p || location.pathname.startsWith("/sip/")
+    );
+    if (!isLoading && !isAuthenticated && isProtected) {
       navigate("/login");
     }
   }, [isAuthenticated, isLoading, location.pathname, navigate]);
@@ -67,30 +78,63 @@ const App = () => {
           />
           <Route
             path="/bills"
-            element={
-              isAuthenticated ? <BillsDashboard /> : <Navigate to="/login" />
-            }
+            element={isAuthenticated ? <BillsDashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/financial-bot"
+            element={isAuthenticated ? <FinancialBot /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/mutual-funds"
+            element={isAuthenticated ? <MutualFunds /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/stocks"
+            element={isAuthenticated ? <Stocks /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/bank-statement"
+            element={isAuthenticated ? <BankStatement /> : <Navigate to="/login" />}
           />
           <Route
             path="/sip-dashboard"
-            element={
-              isAuthenticated ? <SIPDashboard /> : <Navigate to="/login" />
-            }
+            element={isAuthenticated ? <SIPDashboard /> : <Navigate to="/login" />}
           />
           <Route
             path="/sip/:sipId"
-            element={
-              isAuthenticated ? <SIPDetails /> : <Navigate to="/login" />
-            }
+            element={isAuthenticated ? <SIPDetails /> : <Navigate to="/login" />}
           />
+          <Route
+            path="/portfolio"
+            element={isAuthenticated ? <Portfolio /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/net-worth"
+            element={isAuthenticated ? <NetWorth /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/analytics"
+            element={isAuthenticated ? <SpendingAnalytics /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/alerts"
+            element={isAuthenticated ? <Alerts /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/receipt-scanner"
+            element={isAuthenticated ? <ReceiptScanner /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/budgets"
+            element={isAuthenticated ? <BudgetManagement /> : <Navigate to="/login" />}
+          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
           <Route
             path="/login"
-            element={
-              !isAuthenticated ? <Login /> : <Navigate to="/dashboard" />
-              //  <Login />
-            }
+            element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />}
           />
           <Route
             path="/signup"

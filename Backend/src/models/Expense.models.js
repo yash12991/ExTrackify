@@ -49,7 +49,7 @@ const ExpenseSchema = new Schema(
     modeofpayment: {
       type: String,
       enum: {
-        values: ["upi", "credit card","debit card","cash", "cheque","netbanking","other","card"],
+        values: ["upi", "credit card","debit card","cash", "cheque","netbanking","other","card","atm","neft","rtgs","neft/rtgs","imps","mobile wallet","paytm","google pay","phonepe","bank transfer"],
         message: "{VALUE} is not a valid payment mode",
       },
       required: [true, "Mode of payment is required"],

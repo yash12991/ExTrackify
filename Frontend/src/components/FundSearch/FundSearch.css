@@ -1,0 +1,178 @@
+.fund-search {
+  margin-bottom: 0.75rem;
+}
+
+.fund-search label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2d1b0e;
+  margin-bottom: 0.4rem;
+}
+
+.fund-search-icon {
+  color: #f97316;
+  font-size: 0.75rem;
+}
+
+.fund-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #faf6f3;
+  border: 1px solid #e8e0d8;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.fund-search-input-wrap:focus-within {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  background: #fff;
+}
+
+.fund-search-prefix {
+  position: absolute;
+  left: 12px;
+  color: #9a8a7a;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.fund-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #2d1b0e;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  padding: 0.6rem 2.2rem 0.6rem 2rem;
+}
+
+.fund-search-input::placeholder {
+  color: #b5a99c;
+}
+
+.fund-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #9a8a7a;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+}
+
+.fund-search-clear:hover {
+  background: #f0e8e0;
+  color: #2d1b0e;
+}
+
+.fund-search-dropdown {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e8e0d8;
+  border-radius: 10px;
+  margin-top: 4px;
+  box-shadow: 0 8px 24px rgba(45, 27, 14, 0.1);
+}
+
+.fund-search-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.fund-search-dropdown::-webkit-scrollbar-thumb {
+  background: #d5cdc4;
+  border-radius: 4px;
+}
+
+.fund-search-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f5f0ec;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.fund-search-item:last-child {
+  border-bottom: none;
+}
+
+.fund-search-item:hover {
+  background: #fef3e7;
+}
+
+.fund-search-item-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #2d1b0e;
+  line-height: 1.3;
+}
+
+.fund-search-item-code {
+  font-size: 0.7rem;
+  color: #9a8a7a;
+  margin-top: 2px;
+}
+
+.fund-search-preview {
+  margin-top: 0.6rem;
+  padding: 0.7rem;
+  background: #fef3e7;
+  border: 1px solid #fde0c8;
+  border-radius: 10px;
+}
+
+.fund-search-preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem 0;
+  font-size: 0.8rem;
+  color: #5f7088;
+}
+
+.fund-search-preview-row strong {
+  color: #2d1b0e;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fund-search-preview-returns {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.fund-search-return-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.fund-search-return-badge.positive {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.fund-search-return-badge.negative {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}

@@ -112,19 +112,20 @@ const SetExpense = asyncHandler(async (req, res) => {
       );
     }
 
+    // Normalize modeofpayment to lowercase
+    const normalizedMode = modeofpayment.toLowerCase();
+
     // Validate amount
     if (isNaN(amount) || amount <= 0) {
       throw new ApiError(400, "Amount must be a positive number");
     }
 
     // Parse and validate date
-    const expenseDate = new Date(date || Date.now());
-    // const expenseDate = new Date(date || Date.now());
-    expenseDate.setHours(0, 0, 0, 0); // Set to start of day
-
+    let expenseDate = new Date(date || Date.now());
     if (isNaN(expenseDate.getTime())) {
-      throw new ApiError(400, "Invalid date format");
+      expenseDate = new Date(Date.now());
     }
+    expenseDate.setHours(0, 0, 0, 0); // Set to start of day
 
     let nextOccurrence = null;
     if (recurring && frequency) {
@@ -137,7 +138,7 @@ const SetExpense = asyncHandler(async (req, res) => {
       amount: Number(amount),
       date: expenseDate,
       notes: notes?.trim(),
-      modeofpayment,
+      modeofpayment: normalizedMode,
       tags: Array.isArray(tags) ? tags.map((tag) => tag.trim()) : [],
       recurring: Boolean(recurring),
       frequency,

@@ -1,0 +1,147 @@
+.layout-shell {
+  height: 100vh;
+  overflow: hidden;
+  background: #faf6f3;
+  color: var(--db-text, #2d1b0e);
+}
+
+.layout-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1a0f0a 0%, #2d1b0e 100%);
+  border-right: 1px solid rgba(234, 88, 12, 0.15);
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.layout-brand {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1.4rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.layout-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  transition: transform 0.25s ease;
+}
+
+.layout-brand-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #f97316;
+  letter-spacing: -0.02em;
+}
+
+.layout-brand:hover .layout-logo {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.layout-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(234, 88, 12, 0.25) 0%, rgba(234, 88, 12, 0.05) 100%);
+  margin: 0 1rem 0.5rem;
+}
+
+.layout-sidebar-header {
+  padding: 1rem 1.4rem 0.8rem;
+}
+
+.layout-sidebar-header h2 {
+  margin: 0;
+  color: #e5f0ff;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.layout-sidebar-nav {
+  padding: 1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.layout-nav-item {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #9ab0d1;
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.layout-nav-item:hover {
+  color: #f5fbff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.layout-nav-item.active {
+  color: #fff;
+  background: rgba(234, 88, 12, 0.4);
+  border-color: rgba(234, 88, 12, 0.3);
+}
+
+.layout-nav-item:active {
+  transform: scale(0.98);
+}
+
+.layout-content {
+  margin-left: 260px;
+  padding: 1.8rem 2.2rem 2.8rem;
+  height: 100vh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-mode .cursor-dot,
+.dashboard-mode .cursor-ring,
+.dashboard-mode .cursor-blur {
+  display: none !important;
+}
+
+.dashboard-mode,
+.dashboard-mode * {
+  cursor: auto !important;
+}
+
+@media (max-width: 860px) {
+  .layout-shell {
+    height: auto;
+    overflow: visible;
+  }
+
+  .layout-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+
+  .layout-sidebar-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layout-content {
+    margin-left: 0;
+    padding: 1rem;
+    height: auto;
+    overflow: visible;
+  }
+}

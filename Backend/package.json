@@ -13,6 +13,7 @@
     "postinstall": "node -e \"try { require('express/lib/router'); console.log('Express router: OK'); } catch(e) { console.log('Installing Express...'); require('child_process').execSync('npm install express@4.18.2 --force', {stdio: 'inherit'}); }\"",
     "start:alternative": "node ./src/server_alternative.js"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -25,15 +26,21 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csv-parse": "6.2.1",
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
     "express": "4.18.2",
+    "groq-sdk": "1.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.0",
     "ms": "^2.1.3",
+    "multer": "2.1.1",
     "node-cron": "^4.0.7",
     "nodemailer": "^7.0.4",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "pdf-parse": "2.4.5",
+    "resend": "6.12.3",
+    "yahoo-finance2": "3.14.0"
   }
 }

@@ -53,10 +53,6 @@ axiosInstance.interceptors.response.use(
   (error) => {
     console.error("❌ API Error:", error.config?.url, error.response?.status);
 
-    if (error.response?.status === 401) {
-      console.log("🔄 Unauthorized - redirecting to login");
-      window.location.href = "/login";
-    }
     return Promise.reject(error);
   }
 );

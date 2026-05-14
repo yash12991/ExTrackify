@@ -1,29 +1,28 @@
 import toast from "react-hot-toast";
 import { axiosInstance } from "./axios.js";
 
-// OTP functions disabled - email service not available
-// export const sendOtp = async (email) => {
-//   try {
-//     const response = await axiosInstance.post("/otp/send", { email });
-//     return response.data;
-//   } catch (error) {
-//     console.error("Send OTP API error:", error);
-//     const errorMessage = error.response?.data?.message || "Failed to send OTP";
-//     throw new Error(errorMessage);
-//   }
-// };
+export const sendOtp = async (email) => {
+  try {
+    const response = await axiosInstance.post("/otp/send", { email });
+    return response.data;
+  } catch (error) {
+    console.error("Send OTP API error:", error);
+    const errorMessage = error.response?.data?.message || "Failed to send OTP";
+    throw new Error(errorMessage);
+  }
+};
 
-// export const verifyOtp = async (email, otp) => {
-//   try {
-//     const response = await axiosInstance.post("/otp/verify", { email, otp });
-//     return response.data;
-//   } catch (error) {
-//     console.error("Verify OTP API error:", error);
-//     const errorMessage =
-//       error.response?.data?.message || "Failed to verify OTP";
-//     throw new Error(errorMessage);
-//   }
-// };
+export const verifyOtp = async (email, otp) => {
+  try {
+    const response = await axiosInstance.post("/otp/verify", { email, otp });
+    return response.data;
+  } catch (error) {
+    console.error("Verify OTP API error:", error);
+    const errorMessage =
+      error.response?.data?.message || "Failed to verify OTP";
+    throw new Error(errorMessage);
+  }
+};
 
 export const register = async (signupData) => {
   const response = await axiosInstance.post("/users/register", signupData);
@@ -227,7 +226,7 @@ export const markGoalComplete = async (goalId) => {
 
 export const getGoalAnalytics = async () => {
   try {
-    const response = await axiosInstance.get("/api/v1/goals/analytics");
+    const response = await axiosInstance.get("/goals/analytics");
     return response.data.data;
   } catch (error) {
     console.error("Error fetching goal analytics:", error);
@@ -238,9 +237,13 @@ export const getGoalAnalytics = async () => {
 };
 
 export const getOverAllBudget = async () => {
-  const response = await axiosInstance.get("/budgets/overall");
-  console.log(response);
-  return response.data.data.amount;
+  try {
+    const response = await axiosInstance.get("/budgets/overall");
+    return response?.data?.data?.amount ?? 0;
+  } catch (error) {
+    console.error("Error fetching overall budget:", error);
+    return 0;
+  }
 };
 
 export const updateOverallBudget = async (amount) => {
@@ -524,6 +527,193 @@ export const getBillsByCategory = async () => {
   }
 };
 
+export const getTrendingFunds = async () => {
+  try {
+    const response = await axiosInstance.get("/mf/trending");
+    return response.data;
+  } catch (error) {
+    console.error("Trending funds error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch trending funds"
+    );
+  }
+};
+
+export const searchMutualFunds = async (query) => {
+  try {
+    const response = await axiosInstance.get("/mf/search", {
+      params: { q: query },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("MF search error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to search mutual funds"
+    );
+  }
+};
+
+export const getFundDetails = async (schemeCode) => {
+  try {
+    const response = await axiosInstance.get(`/mf/${schemeCode}/details`);
+    return response.data;
+  } catch (error) {
+    console.error("MF details error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch fund details"
+    );
+  }
+};
+
+export const getFundNavHistory = async (schemeCode) => {
+  try {
+    const response = await axiosInstance.get(`/mf/${schemeCode}/nav-history`);
+    return response.data;
+  } catch (error) {
+    console.error("MF NAV history error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch NAV history"
+    );
+  }
+};
+
+export const getTrendingStocks = async () => {
+  try {
+    const response = await axiosInstance.get("/stocks/trending");
+    return response.data;
+  } catch (error) {
+    console.error("Trending stocks error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch trending stocks"
+    );
+  }
+};
+
+export const searchStocks = async (query) => {
+  try {
+    const response = await axiosInstance.get("/stocks/search", {
+      params: { q: query },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Stock search error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to search stocks"
+    );
+  }
+};
+
+export const getStockQuote = async (symbol) => {
+  try {
+    const response = await axiosInstance.get(`/stocks/${symbol}`);
+    return response.data;
+  } catch (error) {
+    console.error("Stock quote error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch stock quote"
+    );
+  }
+};
+
+export const getStockHistory = async (symbol, period = "1mo", interval = "1d") => {
+  try {
+    const response = await axiosInstance.get(`/stocks/${symbol}/history`, {
+      params: { period, interval },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Stock history error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch stock history"
+    );
+  }
+};
+
+export const getMarketIndices = async () => {
+  try {
+    const response = await axiosInstance.get("/stocks/indices");
+    return response.data;
+  } catch (error) {
+    console.error("Market indices error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch market indices"
+    );
+  }
+};
+
+export const getCompanyProfile = async (symbol) => {
+  try {
+    const response = await axiosInstance.get(`/stocks/${symbol}/profile`);
+    return response.data;
+  } catch (error) {
+    console.error("Company profile error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch company profile"
+    );
+  }
+};
+
+export const getStockNews = async (symbol) => {
+  try {
+    const response = await axiosInstance.get(`/stocks/${symbol}/news`);
+    return response.data;
+  } catch (error) {
+    console.error("Stock news error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch stock news"
+    );
+  }
+};
+
+export const analyzeStock = async (symbol, stockData) => {
+  try {
+    const response = await axiosInstance.post("/bot/analyze-stock", { symbol, stockData });
+    return response.data;
+  } catch (error) {
+    console.error("Stock analysis error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to analyze stock"
+    );
+  }
+};
+
+export const sendBotMessage = async (message) => {
+  try {
+    const response = await axiosInstance.post("/bot/chat", { message });
+    return response.data;
+  } catch (error) {
+    console.error("Bot API error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to get bot response"
+    );
+  }
+};
+
+export const uploadBankStatement = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("statement", file);
+    const response = await axiosInstance.post("/bank-statement/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 120000,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Bank statement upload error:", error);
+    throw new Error(error.response?.data?.message || "Failed to process statement");
+  }
+};
+
+export const saveBankTransactions = async (transactions) => {
+  try {
+    const response = await axiosInstance.post("/bank-statement/save", { transactions });
+    return response.data;
+  } catch (error) {
+    console.error("Save transactions error:", error);
+    throw new Error(error.response?.data?.message || "Failed to save transactions");
+  }
+};
+
 export const getMonthlyBillsTotal = async (year, month) => {
   try {
     const response = await axiosInstance.get("/bills/monthly-total", {
@@ -535,5 +725,245 @@ export const getMonthlyBillsTotal = async (year, month) => {
     throw new Error(
       error.response?.data?.message || "Failed to fetch monthly bills total"
     );
+  }
+};
+
+// ─── Budget Alerts ──────────────────────────────────────────
+export const getBudgetAlerts = async () => {
+  try {
+    const response = await axiosInstance.get("/budgets/alerts");
+    return response.data;
+  } catch (error) {
+    console.error("Budget alerts error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch budget alerts");
+  }
+};
+
+export const getBudget = async () => {
+  try {
+    const response = await axiosInstance.get("/budgets");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching budgets:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch budgets");
+  }
+};
+
+export const setOrUpdateBudget = async (budgetData) => {
+  try {
+    const response = await axiosInstance.post("/budgets", budgetData);
+    return response.data;
+  } catch (error) {
+    console.error("Error setting budget:", error);
+    throw new Error(error.response?.data?.message || "Failed to set budget");
+  }
+};
+
+export const getBudgetStatus = async () => {
+  try {
+    const response = await axiosInstance.get("/budgets/status");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching budget status:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch budget status");
+  }
+};
+
+// ─── Portfolio ──────────────────────────────────────────────
+export const getPortfolio = async () => {
+  try {
+    const response = await axiosInstance.get("/portfolio");
+    return response.data;
+  } catch (error) {
+    console.error("Portfolio error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch portfolio");
+  }
+};
+
+export const addHolding = async (holding) => {
+  try {
+    const response = await axiosInstance.post("/portfolio/holdings", holding);
+    return response.data;
+  } catch (error) {
+    console.error("Add holding error:", error);
+    throw new Error(error.response?.data?.message || "Failed to add holding");
+  }
+};
+
+export const removeHolding = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/portfolio/holdings/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Remove holding error:", error);
+    throw new Error(error.response?.data?.message || "Failed to remove holding");
+  }
+};
+
+export const refreshPortfolio = async () => {
+  try {
+    const response = await axiosInstance.post("/portfolio/refresh");
+    return response.data;
+  } catch (error) {
+    console.error("Portfolio refresh error:", error);
+    throw new Error(error.response?.data?.message || "Failed to refresh portfolio");
+  }
+};
+
+export const getPortfolioAnalytics = async () => {
+  try {
+    const response = await axiosInstance.get("/portfolio/analytics");
+    return response.data;
+  } catch (error) {
+    console.error("Portfolio analytics error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch portfolio analytics");
+  }
+};
+
+// ─── Export ─────────────────────────────────────────────────
+export const exportExpensesCSV = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get("/export/expenses", { params, responseType: "blob" });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a"); a.href = url; a.download = `expenses_${Date.now()}.csv`; a.click();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error("Export error:", error);
+    throw new Error("Failed to export expenses");
+  }
+};
+
+export const exportSIPsCSV = async () => {
+  try {
+    const response = await axiosInstance.get("/export/sips", { responseType: "blob" });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a"); a.href = url; a.download = `sips_${Date.now()}.csv`; a.click();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error("Export error:", error);
+    throw new Error("Failed to export SIPs");
+  }
+};
+
+export const exportBillsCSV = async () => {
+  try {
+    const response = await axiosInstance.get("/export/bills", { responseType: "blob" });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a"); a.href = url; a.download = `bills_${Date.now()}.csv`; a.click();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error("Export error:", error);
+    throw new Error("Failed to export bills");
+  }
+};
+
+// ─── Spending Analytics ──────────────────────────────────────
+export const getSpendingAnalytics = async (months = 6) => {
+  try {
+    const response = await axiosInstance.get("/analytics/spending", { params: { months } });
+    return response.data;
+  } catch (error) {
+    console.error("Analytics error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch analytics");
+  }
+};
+
+export const getMonthlyComparison = async () => {
+  try {
+    const response = await axiosInstance.get("/analytics/monthly-comparison");
+    return response.data;
+  } catch (error) {
+    console.error("Monthly comparison error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch comparison");
+  }
+};
+
+// ─── Net Worth ──────────────────────────────────────────────
+export const calculateNetWorth = async () => {
+  try {
+    const response = await axiosInstance.post("/networth/calculate");
+    return response.data;
+  } catch (error) {
+    console.error("Net worth error:", error);
+    throw new Error(error.response?.data?.message || "Failed to calculate net worth");
+  }
+};
+
+export const getNetWorthHistory = async (period = 30) => {
+  try {
+    const response = await axiosInstance.get("/networth/history", { params: { period } });
+    return response.data;
+  } catch (error) {
+    console.error("Net worth history error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch net worth history");
+  }
+};
+
+// ─── Price/NAV Alerts ────────────────────────────────────────
+export const createAlert = async (alert) => {
+  try {
+    const response = await axiosInstance.post("/alerts", alert);
+    return response.data;
+  } catch (error) {
+    console.error("Create alert error:", error);
+    throw new Error(error.response?.data?.message || "Failed to create alert");
+  }
+};
+
+export const getAlerts = async () => {
+  try {
+    const response = await axiosInstance.get("/alerts");
+    return response.data;
+  } catch (error) {
+    console.error("Get alerts error:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch alerts");
+  }
+};
+
+export const updateAlert = async (id, data) => {
+  try {
+    const response = await axiosInstance.put(`/alerts/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Update alert error:", error);
+    throw new Error(error.response?.data?.message || "Failed to update alert");
+  }
+};
+
+export const deleteAlert = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/alerts/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Delete alert error:", error);
+    throw new Error(error.response?.data?.message || "Failed to delete alert");
+  }
+};
+
+export const checkAlerts = async () => {
+  try {
+    const response = await axiosInstance.get("/alerts/check");
+    return response.data;
+  } catch (error) {
+    console.error("Check alerts error:", error);
+    throw new Error(error.response?.data?.message || "Failed to check alerts");
+  }
+};
+
+// ─── Receipt OCR ─────────────────────────────────────────────
+export const processReceipt = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("receipt", file);
+    const response = await axiosInstance.post("/receipts/process", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Receipt processing error:", error);
+    throw new Error(error.response?.data?.message || "Failed to process receipt");
   }
 };

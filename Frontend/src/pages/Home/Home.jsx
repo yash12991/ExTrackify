@@ -1,157 +1,353 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import { NavLink } from "react-router-dom";
-import bglogo from "../../assets/image.png";
 import "./Home.css";
-import { motion, useAnimation } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import { motion, useAnimation, useInView } from "framer-motion";
+import { FaWallet, FaPiggyBank, FaFileInvoiceDollar, FaBullseye, FaArrowRight, FaChartPie, FaRocket, FaShieldAlt, FaChartLine, FaCoins, FaBell, FaFire } from "react-icons/fa";
+import useAuthUser from "../../hooks/useAuthUser";
+import { getOverAllBudget, getExpenseSummary, getAllSIPs, getBillsSummary } from "../../lib/api";
 
-const Home = () => {
-  const controls = useAnimation();
-  const [ref, inView] = useInView();
+const AnimatedCounter = ({ value, suffix = "", prefix = "", decimals = 0 }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (inView) {
-      controls.start("visible");
+    if (!inView) return;
+    let start = 0;
+    const duration = 1500;
+    const step = Math.max(1, Math.floor(value / 60));
+    const interval = setInterval(() => {
+      start += step;
+      if (start >= value) {
+        setDisplay(value);
+        clearInterval(interval);
+      } else {
+        setDisplay(start);
+      }
+    }, duration / 60);
+    return () => clearInterval(interval);
+  }, [inView, value]);
+
+  return (
+    <span ref={ref} className="home-ani-counter">
+      {prefix}{display.toFixed(decimals)}{suffix}
+    </span>
+  );
+};
+
+const CircularProgress = ({ percentage, size = 100, strokeWidth = 8 }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+  const [progress, setProgress] = useState(0);
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / 100) * circumference;
+
+  useEffect(() => {
+    if (!inView) return;
+    let current = 0;
+    const target = Math.min(percentage, 100);
+    const interval = setInterval(() => {
+      current += 1;
+      if (current >= target) {
+        setProgress(target);
+        clearInterval(interval);
+      } else {
+        setProgress(current);
+      }
+    }, 20);
+    return () => clearInterval(interval);
+  }, [inView, percentage]);
+
+  const color = percentage > 80 ? "#ef4444" : percentage > 50 ? "#f97316" : "#22c55e";
+
+  return (
+    <div ref={ref} className="home-circular-progress" style={{ width: size, height: size }}>
+      <svg width={size} height={size}>
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke="rgba(255,255,255,0.1)"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: "stroke-dashoffset 0.1s ease" }}
+        />
+      </svg>
+      <div className="home-circular-label">
+        <AnimatedCounter value={percentage} suffix="%" decimals={0} />
+      </div>
+    </div>
+  );
+};
+
+const FeatureCard = ({ icon, title, desc, delay }) => (
+  <motion.div
+    className="home-feature-card"
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay, duration: 0.5 }}
+    whileHover={{ y: -5, scale: 1.02 }}
+  >
+    <div className="home-feature-icon">{icon}</div>
+    <h4>{title}</h4>
+    <p>{desc}</p>
+  </motion.div>
+);
+
+const Home = () => {
+  const { isAuthenticated, isLoading } = useAuthUser();
+  const [liveData, setLiveData] = useState(null);
+  const [dataLoading, setDataLoading] = useState(false);
+  const mainRef = useRef(null);
+  const mainInView = useInView(mainRef, { once: true });
+
+  const fetchLiveData = useCallback(async () => {
+    setDataLoading(true);
+    try {
+      const [budget, expenseSummary, sips, billsSummary] = await Promise.all([
+        getOverAllBudget().catch(() => 0),
+        getExpenseSummary("monthly").catch(() => ({ total: 0 })),
+        getAllSIPs().catch(() => []),
+        getBillsSummary().catch(() => ({ pending: { count: 0 } })),
+      ]);
+      const monthlyExpense = expenseSummary.total || 0;
+      const budgetNum = budget || 0;
+      const budgetUsed = budgetNum > 0 ? Math.round((monthlyExpense / budgetNum) * 100) : 0;
+      const monthlySave = Math.max(0, budgetNum - monthlyExpense);
+      setLiveData({
+        budgetUsed,
+        activeSIPs: Array.isArray(sips) ? sips.filter((s) => s.status !== "completed").length : 0,
+        pendingBills: billsSummary?.pending?.count || 0,
+        monthlySave,
+      });
+    } catch {
+      setLiveData(null);
+    } finally {
+      setDataLoading(false);
     }
-  }, [controls, inView]);
+  }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-      },
-    },
+  useEffect(() => {
+    if (isAuthenticated) fetchLiveData();
+  }, [isAuthenticated, fetchLiveData]);
+
+  const stats = liveData || {
+    budgetUsed: 68,
+    activeSIPs: 12,
+    pendingBills: 4,
+    monthlySave: 18000,
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const floatingAnimation = {
-    y: [-10, 10],
-    transition: {
-      duration: 2,
-      repeat: Infinity,
-      repeatType: "reverse",
-      ease: "easeInOut",
-    },
+  const formatCurrency = (val) => {
+    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+    if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
+    return `₹${val}`;
   };
 
   return (
-    <div className="homePage min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#1f1f1f] flex flex-col overflow-hidden">
-      <motion.div
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
+    <div className="home-page">
+      <motion.div initial={{ y: -100 }} animate={{ y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
         <Navbar />
       </motion.div>
 
-      <div className="flex flex-1 items-center justify-between px-8 md:px-16 relative">
-        {/* Animated background elements */}
-        <motion.div
-          className="absolute inset-0"
-          animate={{
-            background: [
-              "radial-gradient(circle at 20% 20%, rgba(255, 107, 0, 0.1) 0%, transparent 50%)",
-              "radial-gradient(circle at 80% 80%, rgba(255, 107, 0, 0.1) 0%, transparent 50%)",
-            ],
-          }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
-        />
-
-        <motion.div
-          ref={ref}
-          variants={containerVariants}
-          initial="hidden"
-          animate={controls}
-          className="flex-1 max-w-2xl space-y-8 z-10"
-        >
-          <motion.h1
-            className="text-6xl font-extrabold text-[#ff6b00] drop-shadow-lg leading-tight"
-            variants={itemVariants}
+      <section className="home-hero">
+        <div className="home-hero-bg" />
+        <div className="home-hero-content">
+          <motion.div
+            className="home-hero-text"
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            Track Your <br />
-            <motion.span
-              className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b00] to-[#ff8533]"
-              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-              transition={{ duration: 5, repeat: Infinity }}
-            >
-              Expenses Smartly
-            </motion.span>
-          </motion.h1>
-
-          <motion.p className="text-xl text-gray-300" variants={itemVariants}>
-            <span className="font-semibold text-[#ff6b00]">ExTrackify</span>{" "}
-            helps you manage your money with ease. Add and categorize your
-            expenses, track your budget, and visualize your spending with
-            beautiful charts.
-          </motion.p>
-
-          <motion.div className="flex gap-4" variants={itemVariants}>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <NavLink
-                to="/dashboard"
-                className="home-link bg-gradient-to-r from-[#ff6b00] to-[#ff8533] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg transition-all duration-300"
-              >
-                Get Started Free
-              </NavLink>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <NavLink
-                to="/features"
-                className="px-8 py-4 rounded-full text-xl font-bold border-2 border-[#ff6b00] text-[#ff6b00] hover:bg-[#ff6b00] hover:text-white transition-all duration-300"
-              >
-                Learn More
-              </NavLink>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          className="hidden md:flex flex-1 justify-center items-center"
-          initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1 }}
-        >
-          <motion.div className="relative" animate={floatingAnimation}>
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-[#ff6b00]/20 to-[#ff8533]/20 rounded-full filter blur-3xl"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0.8, 0.5],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-            />
-            <motion.img
-              src={bglogo}
-              alt="Expense Tracker Illustration"
-              className="relative w-96 h-96 object-contain rounded-xl"
-              whileHover={{
-                scale: 1.1,
-                rotate: 5,
-                transition: { duration: 0.3 },
-              }}
-            />
+              className="home-hero-chip"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <FaFire /> Smart Finance Tracking
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              Take Control of Your{" "}
+              <span className="home-gradient-text">Financial Life</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.6 }}
+            >
+              Track expenses, manage SIPs, pay bills, and achieve your financial goals — all in one powerful dashboard.
+            </motion.p>
+            <motion.div
+              className="home-hero-actions"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              <NavLink to="/dashboard" className="home-btn-primary">
+                Get Started Free <FaArrowRight />
+              </NavLink>
+              <NavLink to="/features" className="home-btn-secondary">
+                Explore Features
+              </NavLink>
+            </motion.div>
           </motion.div>
+
+          <motion.div
+            className="home-hero-visual"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <div className="home-analytics-wrapper" ref={mainRef}>
+              <div className="home-analytics-panel">
+                <div className="home-analytics-header">
+                  <div className="home-analytics-chip">
+                    <FaChartPie /> Live Insights
+                  </div>
+                  {isAuthenticated && !dataLoading && (
+                    <button className="home-analytics-refresh" onClick={fetchLiveData} title="Refresh data">
+                      <FaRocket />
+                    </button>
+                  )}
+                </div>
+                <h3>Your Financial Snapshot</h3>
+                <div className="home-analytics-grid">
+                  <motion.div
+                    className="home-analytics-card budget"
+                    whileHover={{ scale: 1.03, y: -2 }}
+                  >
+                    <div className="home-analytics-card-left">
+                      <CircularProgress percentage={stats.budgetUsed} size={72} strokeWidth={6} />
+                    </div>
+                    <div className="home-analytics-card-right">
+                      <span className="home-analytics-label">Budget Used</span>
+                      <strong className="home-analytics-value">
+                        <AnimatedCounter value={stats.budgetUsed} suffix="%" />
+                      </strong>
+                      <span className="home-analytics-sub">
+                        {liveData ? `${formatCurrency(liveData.monthlySave + (liveData.budgetUsed > 0 ? Math.round((liveData.budgetUsed / 100) * (liveData.monthlySave / ((100 - liveData.budgetUsed) / 100))) / (liveData.budgetUsed / 100) : 0))} total` : "Track your spending"}
+                      </span>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="home-analytics-card sips"
+                    whileHover={{ scale: 1.03, y: -2 }}
+                  >
+                    <div className="home-analytics-card-icon">
+                      <FaPiggyBank />
+                    </div>
+                    <div className="home-analytics-card-body">
+                      <span className="home-analytics-label">Active SIPs</span>
+                      <strong className="home-analytics-value">
+                        <AnimatedCounter value={stats.activeSIPs} />
+                      </strong>
+                      <span className="home-analytics-sub">{liveData ? "Running" : "Systematic investments"}</span>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="home-analytics-card bills"
+                    whileHover={{ scale: 1.03, y: -2 }}
+                  >
+                    <div className="home-analytics-card-icon">
+                      <FaFileInvoiceDollar />
+                    </div>
+                    <div className="home-analytics-card-body">
+                      <span className="home-analytics-label">Pending Bills</span>
+                      <strong className="home-analytics-value">
+                        <AnimatedCounter value={stats.pendingBills} />
+                      </strong>
+                      <span className="home-analytics-sub">{liveData ? "Due soon" : "Never miss a payment"}</span>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="home-analytics-card save"
+                    whileHover={{ scale: 1.03, y: -2 }}
+                  >
+                    <div className="home-analytics-card-icon">
+                      <FaCoins />
+                    </div>
+                    <div className="home-analytics-card-body">
+                      <span className="home-analytics-label">Monthly Save</span>
+                      <strong className="home-analytics-value">
+                        <AnimatedCounter value={stats.monthlySave} prefix="₹" />
+                      </strong>
+                      <span className="home-analytics-sub">{liveData ? "Budget remaining" : "Start saving today"}</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="home-features">
+        <motion.div
+          className="home-section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <h2>Everything You Need to <span className="home-gradient-text">Manage Your Money</span></h2>
+          <p>Powerful tools to track, analyze, and optimize your personal finances</p>
         </motion.div>
-      </div>
+        <div className="home-features-grid">
+          <FeatureCard
+            icon={<FaWallet />}
+            title="Expense Tracking"
+            desc="Log and categorize expenses with ease. Set budgets and get insights on your spending patterns."
+            delay={0}
+          />
+          <FeatureCard
+            icon={<FaChartLine />}
+            title="SIP Management"
+            desc="Track your mutual fund SIPs, view projected returns, and manage your investment portfolio."
+            delay={0.1}
+          />
+          <FeatureCard
+            icon={<FaBell />}
+            title="Bill Reminders"
+            desc="Never miss a payment. Get reminders for upcoming bills and keep your finances on track."
+            delay={0.2}
+          />
+          <FeatureCard
+            icon={<FaBullseye />}
+            title="Goal Planning"
+            desc="Set financial goals, track progress, and get estimated completion dates based on your savings."
+            delay={0.3}
+          />
+          <FeatureCard
+            icon={<FaShieldAlt />}
+            title="Smart Insights"
+            desc="AI-powered analysis of your finances with personalized recommendations to save more."
+            delay={0.4}
+          />
+          <FeatureCard
+            icon={<FaChartPie />}
+            title="Visual Analytics"
+            desc="Beautiful charts and graphs to visualize your income, expenses, and investment growth."
+            delay={0.5}
+          />
+        </div>
+      </section>
+
+      <footer className="home-footer">
+        <p>© 2026 ExTrackify. Take control of your finances.</p>
+      </footer>
     </div>
   );
 };

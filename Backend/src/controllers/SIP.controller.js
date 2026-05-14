@@ -22,6 +22,8 @@ const createSIP = asyncHandler(async (req, res) => {
     goal,
     notes,
     expectedRate = 12,
+    schemeCode,
+    schemeName,
   } = req.body;
 
   if (!sipName || !amount) {
@@ -60,6 +62,8 @@ const createSIP = asyncHandler(async (req, res) => {
     expectedMaturityValue,
     user: req.user._id,
     nextPaymentDate,
+    schemeCode,
+    schemeName,
   });
 
   // Send email notification
@@ -351,9 +355,9 @@ const getSIPSummary = asyncHandler(async (req, res) => {
       .filter((sip) => sip.isActive)
       .reduce((sum, sip) => sum + sip.amount, 0),
     upcomingPayments: await getUpcomingPayments(req.user._id),
-    recentActivity: allPayments
-      .slice(0, 5)
-      .sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate)),
+    recentActivity: [...allPayments]
+      .sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate))
+      .slice(0, 5),
   };
 
   res

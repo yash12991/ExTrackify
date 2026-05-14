@@ -9,16 +9,14 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import { FaCross, FaRemoveFormat, FaTimes, FaXbox } from "react-icons/fa";
+import { FaTimes, FaRupeeSign, FaPercentage, FaCalendarAlt, FaChartLine } from "react-icons/fa";
 
-const Sipcalc = ({onClose}) => {
+const Sipcalc = ({ onClose }) => {
   const [monthlyInvestment, SetMonthly] = useState("");
   const [Rate, SetRate] = useState("");
   const [period, SetPeriod] = useState("");
   const [Result, SetResult] = useState("");
   const [chartData, setChartData] = useState([]);
-
-
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -41,7 +39,6 @@ const Sipcalc = ({onClose}) => {
     const FV = monthly * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
     SetResult(FV);
 
-    // Generate chart data
     let data = [];
     let accumulated = 0;
     let invested = 0;
@@ -50,7 +47,6 @@ const Sipcalc = ({onClose}) => {
       accumulated = accumulated * (1 + r) + monthly;
       invested += monthly;
 
-      // Add data point every 12 months (yearly)
       if (i % 12 === 0) {
         data.push({
           month: i / 12,
@@ -68,21 +64,19 @@ const Sipcalc = ({onClose}) => {
     SetRate("");
     SetPeriod("");
     SetResult("");
-    setChartData([]); // Reset chart data
+    setChartData([]);
   }
 
-  // Custom tooltip for better formatting
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="custom-tooltip">
-          <p className="tooltip-label">{`Year ${label}`}</p>
-          <p className="tooltip-invested">
-            Total Invested: ₹
-            {payload[0].payload.invested.toLocaleString("en-IN")}
+        <div className="calc-tooltip">
+          <p className="calc-tooltip-label">Year {label}</p>
+          <p className="calc-tooltip-row">
+            Invested: ₹{payload[0].payload.invested.toLocaleString("en-IN")}
           </p>
-          <p className="tooltip-value">
-            Portfolio Value: ₹{payload[1].payload.value.toLocaleString("en-IN")}
+          <p className="calc-tooltip-row highlight">
+            Value: ₹{payload[1].payload.value.toLocaleString("en-IN")}
           </p>
         </div>
       );
@@ -90,136 +84,120 @@ const Sipcalc = ({onClose}) => {
     return null;
   };
 
+  const totalInvested = monthlyInvestment * period * 12;
+  const expectedReturns = Result - totalInvested;
+
   return (
-    <div className="SipCalc-form">
-      <FaTimes className="dismiss" onClick={onClose}  />
-      <form onSubmit={handleSubmit}>
-        <div className="form">
-          <div className="form-inputs">
-            <div className="inputs">
-              <label>
-                <h3>Monthly Investment</h3>
-              </label>
-              <input
-                type="number"
-                value={monthlyInvestment}
-                onChange={(e) => SetMonthly(e.target.value)}
-                placeholder="e.g., 5000"
-                min="1"
-                required
-              />
-            </div>
-
-            <div className="inputs">
-              <label>
-                <h3>Expected Annual Returns (%)</h3>
-              </label>
-              <input
-                type="number"
-                value={Rate}
-                onChange={(e) => SetRate(e.target.value)}
-                placeholder="e.g., 12"
-                min="0.1"
-                max="50"
-                step="0.1"
-                required
-              />
-            </div>
-
-            <div className="inputs">
-              <label>
-                <h3>Investment Period (Years)</h3>
-              </label>
-              <input
-                type="number"
-                value={period}
-                onChange={(e) => SetPeriod(e.target.value)}
-                placeholder="e.g., 10"
-                min="1"
-                max="50"
-                required
-              />
+    <div className="calc-overlay">
+      <div className="calc-modal">
+        <div className="calc-modal-header">
+          <div className="calc-modal-title">
+            <FaChartLine className="calc-modal-icon" />
+            <div>
+              <h3>SIP Calculator</h3>
+              <p>Estimate your investment growth</p>
             </div>
           </div>
+          <button className="calc-modal-close" onClick={onClose}>
+            <FaTimes />
+          </button>
+        </div>
 
-          <div style={{ display: "flex", gap: "15px" }}>
-            <button type="submit" className="submit-btn">
-              Calculate
-            </button>
-            <button
-              type="button"
-              className="submit-btn reset-btn"
-              onClick={handleReset}
-            >
-              Reset
-            </button>
+        <div className="calc-modal-body">
+          <form onSubmit={handleSubmit}>
+            <div className="calc-input-row">
+              <div className="calc-input-group">
+                <label>
+                  <FaRupeeSign /> Monthly Investment
+                </label>
+                <input
+                  type="number"
+                  value={monthlyInvestment}
+                  onChange={(e) => SetMonthly(e.target.value)}
+                  placeholder="5000"
+                  min="1"
+                  required
+                />
+              </div>
+              <div className="calc-input-group">
+                <label>
+                  <FaPercentage /> Annual Return (%)
+                </label>
+                <input
+                  type="number"
+                  value={Rate}
+                  onChange={(e) => SetRate(e.target.value)}
+                  placeholder="12"
+                  min="0.1"
+                  max="50"
+                  step="0.1"
+                  required
+                />
+              </div>
+              <div className="calc-input-group">
+                <label>
+                  <FaCalendarAlt /> Period (Years)
+                </label>
+                <input
+                  type="number"
+                  value={period}
+                  onChange={(e) => SetPeriod(e.target.value)}
+                  placeholder="10"
+                  min="1"
+                  max="50"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="calc-modal-actions">
+              <button type="submit" className="calc-btn-pri">Calculate</button>
+              <button type="button" className="calc-btn-sec" onClick={handleReset}>Reset</button>
+            </div>
+          </form>
+
+          {Result && (
+            <div className="calc-result">
+              <div className="calc-result-main">
+                <span className="calc-result-label">Future Value</span>
+                <span className="calc-result-amount">
+                  ₹{parseFloat(Result).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                </span>
+              </div>
+              <div className="calc-result-meta">
+                <div className="calc-result-item">
+                  <span>Invested</span>
+                  <span>₹{totalInvested.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="calc-result-item">
+                  <span>Returns</span>
+                  <span className="calc-return-positive">
+                    +₹{expectedReturns.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {chartData.length > 0 && (
+          <div className="calc-chart-section">
+            <h4>Growth Over Time</h4>
+            <div className="calc-chart-wrap">
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 30 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" label={{ value: "Years", position: "insideBottom", offset: -10 }} stroke="#9ca3af" fontSize={12} />
+                  <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} stroke="#9ca3af" fontSize={12} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line type="monotone" dataKey="invested" stroke="#9ca3af" strokeWidth={2} dot={false} name="Invested" />
+                  <Line type="monotone" dataKey="value" stroke="#0e7490" strokeWidth={3} dot={false} name="Value" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
-      </form>
-
-      {Result && (
-        <div className="result-box">
-          <h2>
-            Future Value of SIP: ₹
-            {parseFloat(Result).toLocaleString("en-IN", {
-              maximumFractionDigits: 0,
-            })}
-          </h2>
-          <p style={{ margin: "10px 0 0 0", color: "#ccc", fontSize: "14px" }}>
-            Total Investment: ₹
-            {(monthlyInvestment * period * 12).toLocaleString("en-IN")} |
-            Expected Returns: ₹
-            {(Result - monthlyInvestment * period * 12).toLocaleString(
-              "en-IN",
-              { maximumFractionDigits: 0 }
-            )}
-          </p>
-        </div>
-      )}
-
-      {chartData.length > 0 && (
-        <div className="chart-container">
-          <h3 className="chart-title">SIP Growth Visualization</h3>
-          <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart
-                data={chartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis
-                  dataKey="month"
-                  label={{
-                    value: "Years",
-                    position: "insideBottomRight",
-                    offset: 0,
-                  }}
-                  stroke="#fff"
-                />
-                <YAxis
-                  tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
-                  stroke="#fff"
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="invested"
-                  stroke="#888"
-                  strokeWidth={2}
-                  name="Total Invested"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#ff6b35"
-                  strokeWidth={3}
-                  name="Portfolio Value"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

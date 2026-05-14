@@ -1,10 +1,26 @@
 /* SIP Details Page Styles - Modern Teal-Blue Theme */
 .sip-details-container {
-  min-height: 100vh;
+  flex: 0 0 auto;
+  min-height: 100%;
+  overflow: visible;
+  box-sizing: border-box;
   background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
   padding: 20px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: #ffffff;
+}
+
+.sip-details-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sip-details-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sip-details-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
 }
 
 /* Header Styles */
@@ -46,30 +62,7 @@
 .header-left {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-}
-
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  width: fit-content;
-  box-shadow: 0 8px 20px rgba(0, 210, 255, 0.4);
-}
-
-.back-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(0, 210, 255, 0.5);
-  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+  gap: 10px;
 }
 
 .sip-title h1 {

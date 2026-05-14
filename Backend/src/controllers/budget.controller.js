@@ -149,15 +149,51 @@ const getOverAllBudget = asyncHandler(async(req,res)=>{
       year,
     });
     if(!overall){
-      throw new ApiError(404,"OverAll budget not set  for this month")
+      return res
+        .status(200)
+        .json(new ApiResponse(200, { amount: 0, month, year }, "Overall budget not set, defaulting to 0"));
     }
        return res.status(200).json(new ApiResponse(200, overall, "Overall budget fetched"));
 })
+
+const checkBudgetAlerts = asyncHandler(async (req, res) => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  const budgets = await Budget.find({ user: req.user._id, month, year });
+  const alerts = [];
+
+  for (const budget of budgets) {
+    const totalSpent = await Expense.aggregate([
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(req.user._id),
+          category: budget.category,
+          date: { $gte: new Date(year, month, 1), $lt: new Date(year, month + 1, 1) },
+        },
+      },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+
+    const spent = totalSpent[0]?.total || 0;
+    const percent = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+
+    if (percent >= 80 && percent < 100) {
+      alerts.push({ type: "warning", category: budget.category, spent, budget: budget.amount, percent, message: `${budget.category}: ${percent.toFixed(0)}% used` });
+    } else if (percent >= 100) {
+      alerts.push({ type: "danger", category: budget.category, spent, budget: budget.amount, percent, message: `${budget.category}: Exceeded by ₹${(spent - budget.amount).toFixed(0)}` });
+    }
+  }
+
+  return res.status(200).json(new ApiResponse(200, alerts, "Budget alerts checked"));
+});
 
 export {
   setOrUpdateBudget,
   getBudget,
   getBudgetStatus,
   setOrUpdateOverallBudget,
-  getOverAllBudget
+  getOverAllBudget,
+  checkBudgetAlerts,
 };

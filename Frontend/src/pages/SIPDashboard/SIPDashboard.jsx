@@ -17,7 +17,6 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaCalculator,
-  FaBackward,
 } from "react-icons/fa";
 
 import { Line } from "react-chartjs-2";
@@ -32,7 +31,9 @@ import {
   getUpcomingPayments,
 } from "../../lib/api";
 import "./SIPDashboard.css";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 import Sipcalc from "../../components/calculator/Sipcalc";
+import FundSearch from "../../components/FundSearch/FundSearch";
 
 const SIPDashboard = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const SIPDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSIP, setEditingSIP] = useState(null);
   const [filter, setFilter] = useState("all"); // all, active, inactive
-  const [displaycalc, setDisplayCalc] = useState("false");
+  const [displaycalc, setDisplayCalc] = useState(false);
   const [createFormData, setCreateFormData] = useState({
     sipName: "",
     amount: "",
@@ -55,6 +56,8 @@ const SIPDashboard = () => {
     goal: "",
     notes: "",
     expectedRate: 12,
+    schemeCode: null,
+    schemeName: null,
   });
 
   const [editFormData, setEditFormData] = useState({
@@ -66,6 +69,8 @@ const SIPDashboard = () => {
     goal: "",
     notes: "",
     expectedRate: 12,
+    schemeCode: null,
+    schemeName: null,
   });
 
   useEffect(() => {
@@ -209,6 +214,8 @@ const SIPDashboard = () => {
         goal: "",
         notes: "",
         expectedRate: 12,
+        schemeCode: null,
+        schemeName: null,
       });
       fetchData();
     } catch (error) {
@@ -227,6 +234,8 @@ const SIPDashboard = () => {
       goal: sip.goal || "",
       notes: sip.notes || "",
       expectedRate: sip.expectedRate || 12,
+      schemeCode: sip.schemeCode || null,
+      schemeName: sip.schemeName || null,
     });
     setShowEditModal(true);
   };
@@ -277,22 +286,22 @@ const SIPDashboard = () => {
   }
 
   return (
+    <DashboardLayout>
     <div className="sip-dashboard">
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-content">
-          <img src="./image.png" alt="logo" style={{ width: "60px" }} />
-          <h1>SIP Dashboard</h1>
-          <p>Manage your Systematic Investment Plans</p>
+          <div>
+            <p className="eyebrow">Investment Planning</p>
+            <h1>SIP Dashboard</h1>
+            <p>Manage and track your Systematic Investment Plans</p>
+          </div>
         </div>
 
         <div className="Nav-btn">
-          <button className="back-bt " onClick={() => navigate("/dashboard")}>
-            <FaBackward />
-          </button>
           <button
             className="calc-btn"
-            onClick={() => setDisplayCalc(displaycalc === true ? false : true)}
+            onClick={() => setDisplayCalc(!displaycalc)}
           >
             <FaCalculator />
             Calculator
@@ -306,10 +315,8 @@ const SIPDashboard = () => {
         </div>
       </div>
 
-      {displaycalc === true ? (
+      {displaycalc && (
         <Sipcalc onClose={() => setDisplayCalc(false)} />
-      ) : (
-        " "
       )}
       {/* Summary Cards */}
       {summary && (
@@ -556,6 +563,24 @@ const SIPDashboard = () => {
                 />
               </div>
 
+              <FundSearch
+                selected={
+                  createFormData.schemeCode
+                    ? {
+                        schemeCode: createFormData.schemeCode,
+                        schemeName: createFormData.schemeName,
+                      }
+                    : null
+                }
+                onSelect={({ schemeCode, schemeName }) =>
+                  setCreateFormData((prev) => ({
+                    ...prev,
+                    schemeCode,
+                    schemeName,
+                  }))
+                }
+              />
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Amount *</label>
@@ -728,6 +753,24 @@ const SIPDashboard = () => {
                 />
               </div>
 
+              <FundSearch
+                selected={
+                  editFormData.schemeCode
+                    ? {
+                        schemeCode: editFormData.schemeCode,
+                        schemeName: editFormData.schemeName,
+                      }
+                    : null
+                }
+                onSelect={({ schemeCode, schemeName }) =>
+                  setEditFormData((prev) => ({
+                    ...prev,
+                    schemeCode,
+                    schemeName,
+                  }))
+                }
+              />
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Amount *</label>
@@ -877,6 +920,7 @@ const SIPDashboard = () => {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

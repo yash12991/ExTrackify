@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/Users.models.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/resend.js";
+import { welcomeTemplate, forgotPasswordTemplate } from "../utils/emailTemplates.js";
 
 const generateAccessTokenandRefreshToken = async (userId) => {
   try {
@@ -76,6 +78,12 @@ const registerUser = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   };
+
+  sendEmail({
+    to: email,
+    subject: "Welcome to ExTrackify! 🎉",
+    html: welcomeTemplate(name),
+  }).catch((err) => console.error("Welcome email failed:", err));
 
   return res
     .status(201)
@@ -251,6 +259,70 @@ const displayCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, req.user, "Current user fetch succesfully"));
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(200).json(
+      new ApiResponse(200, {}, "If an account exists, a reset link has been sent")
+    );
+  }
+
+  const resetToken = jwt.sign(
+    { _id: user._id, purpose: "password-reset" },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: "1h" }
+  );
+
+  const frontendUrl = process.env.FRONTEND_URL || "https://ex-trackify.vercel.app";
+  const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+  sendEmail({
+    to: email,
+    subject: "Reset your password - ExTrackify",
+    html: forgotPasswordTemplate(resetLink),
+  }).catch((err) => console.error("Password reset email failed:", err));
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "If an account exists, a reset link has been sent")
+  );
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    throw new ApiError(400, "Token and new password are required");
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (decoded.purpose !== "password-reset") {
+      throw new ApiError(401, "Invalid reset token");
+    }
+
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json(
+      new ApiResponse(200, {}, "Password reset successfully")
+    );
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(401, "Invalid or expired reset token");
+  }
+});
+
 export {
   registerUser,
   login,
@@ -260,4 +332,6 @@ export {
   deleteUser,
   changePassword,
   displayCurrentUser,
+  forgotPassword,
+  resetPassword,
 };

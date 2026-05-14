@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  FaArrowLeft,
   FaEdit,
   FaTrash,
   FaCalendarAlt,
@@ -49,6 +48,7 @@ import {
   getAllPayments,
 } from "../../lib/api";
 import Loader from "../../components/Loading/Loading";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 import "./SIPDetails.css";
 
 // Register Chart.js components
@@ -345,31 +345,30 @@ const SIPDetails = () => {
 
   if (loading) {
     return (
-      <div className="sip-details-container">
-        <Loader />
-      </div>
+      <DashboardLayout>
+        <div className="sip-details-container">
+          <Loader />
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!sip) {
     return (
-      <div className="sip-details-container">
-        <div className="error-state">
-          <FaExclamationTriangle size={48} />
-          <h2>SIP Not Found</h2>
-          <p>The requested SIP could not be found.</p>
-          <button
-            onClick={() => navigate("/sip-dashboard")}
-            className="btn-primary"
-          >
-            Back to Dashboard
-          </button>
+      <DashboardLayout>
+        <div className="sip-details-container">
+          <div className="error-state">
+            <FaExclamationTriangle size={48} />
+            <h2>SIP Not Found</h2>
+            <p>The requested SIP could not be found.</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
+    <DashboardLayout>
     <div className="sip-details-container">
       {/* Header */}
       <motion.div
@@ -379,12 +378,6 @@ const SIPDetails = () => {
         transition={{ duration: 0.3 }}
       >
         <div className="header-left">
-          <button
-            onClick={() => navigate("/sip-dashboard")}
-            className="back-btn"
-          >
-            <FaArrowLeft /> Back to Dashboard
-          </button>
           <div className="sip-title">
             <h1>{sip.sipName}</h1>
             <div className="sip-status">
@@ -1090,6 +1083,7 @@ const SIPDetails = () => {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

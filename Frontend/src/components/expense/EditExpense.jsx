@@ -182,8 +182,6 @@ const EditExpense = ({ expense, onClose, onSubmit, isLoading }) => {
                 Optional: Add any additional details about this expense
               </div>
             </div>
-          </form>
-        </div>
 
         <div className="form-actions">
           <button
@@ -197,7 +195,6 @@ const EditExpense = ({ expense, onClose, onSubmit, isLoading }) => {
           <button
             type="submit"
             className="submit-btn"
-            onClick={handleSubmit}
             disabled={isLoading}
           >
             {isLoading ? (
@@ -209,6 +206,8 @@ const EditExpense = ({ expense, onClose, onSubmit, isLoading }) => {
               "Update Expense"
             )}
           </button>
+        </div>
+          </form>
         </div>
       </div>
     </div>

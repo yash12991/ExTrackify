@@ -15,6 +15,7 @@
     "chart.js": "^4.5.0",
     "debounce": "^2.2.0",
     "framer-motion": "^12.18.1",
+    "lightweight-charts": "^5.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.516.0",
     "prop-types": "^15.8.1",

@@ -26,6 +26,13 @@ const sipSchema = new Schema(
       enum: ["monthly", "quarterly", "yearly"],
       default: "monthly",
     },
+    schemeCode: {
+      type: Number,
+    },
+    schemeName: {
+      type: String,
+      trim: true,
+    },
     goal: {
       type: String,
       trim: true,
